@@ -1,0 +1,19 @@
+{
+  "name": "xtal-deco",
+  "version": "0.0.0",
+  "description": "TBD",
+  "main": "xtal-deco.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bahrus/xtal-deco.git"
+  },
+  "author": "anderson.bruce.b@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bahrus/xtal-deco/issues"
+  },
+  "homepage": "https://github.com/bahrus/xtal-deco#readme"
+}
