@@ -10,6 +10,20 @@
     "type": "git",
     "url": "git+https://github.com/bahrus/xtal-deco.git"
   },
+  "dependencies": {
+    "trans-render": "0.0.111",
+    "xtal-element": "0.0.59",
+    "xtal-shell": "0.0.18"
+  },
+  "devDependencies": {
+    "@polymer/paper-input": "3.0.2",
+    "@polymer/polymer": "3.2.0",
+    "@types/tape": "4.2.33",
+    "@webcomponents/webcomponentsjs": "2.2.10",
+    "jiife": "0.0.12",
+    "tape": "4.10.1",
+    "xtal-test": "0.0.18"
+  },
   "author": "anderson.bruce.b@gmail.com",
   "license": "MIT",
   "bugs": {
