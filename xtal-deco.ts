@@ -8,6 +8,7 @@ const use_symbols = 'use-symbols';
 const attach_script = 'attach-script';
 const where_target_selector = 'where-target-selector';
 
+
 /**
  * `xtal-deco`
  *  Attach / override behavior to the next element
@@ -136,13 +137,10 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
         if(!this._decorateArgs && this._script){
             this.evaluateCode(this._script)
         }
-        if(!this._c || !this._nextSibling || !this._decorateArgs) return;
+        if(!this._c || this._nextSibling === null || this._decorateArgs === undefined) return;
         let target : HTMLElement | null = this._nextSibling;
-        if(target !== null){
-            if(this._whereTargetSelector){
-                target = target.querySelector(this._whereTargetSelector);
-            }
-        }
+        
+
 
         if(target === null){
             setTimeout(() => {
@@ -150,15 +148,25 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
             }, 50);
             return;
         }
-        decorate(target, this._decorateArgs);
-        const da = target.getAttribute('disabled');
-        if(da !== null){
-            if(da.length === 0 ||da==="1"){
-                target.removeAttribute('disabled');
-            }else{
-                target.setAttribute('disabled', (parseInt(da) - 1).toString());
+        let targets : HTMLElement[] | undefined;
+        if(target !== null){
+            if(this._whereTargetSelector){
+                targets = Array.from(target.querySelectorAll(this._whereTargetSelector));
             }
         }
+        const targets2 = targets !== undefined ? targets : [target];
+        targets2.forEach(singleTarget =>{
+            decorate(singleTarget, this._decorateArgs!);
+            const da = singleTarget.getAttribute('disabled');
+            if(da !== null){
+                if(da.length === 0 ||da==="1"){
+                    singleTarget.removeAttribute('disabled');
+                }else{
+                    singleTarget.setAttribute('disabled', (parseInt(da) - 1).toString());
+                }
+            }            
+        })
+
         this._a = true;
         this.dataset.status = '📎'; //attached
     }
