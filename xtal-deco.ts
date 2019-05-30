@@ -152,6 +152,12 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
         if(target !== null){
             if(this._whereTargetSelector){
                 targets = Array.from(target.querySelectorAll(this._whereTargetSelector));
+                if(targets.length === 0){
+                    setTimeout(() => {
+                        this.onPropsChange();
+                    }, 50);
+                    return;
+                }
             }
         }
         const targets2 = targets !== undefined ? targets : [target];
