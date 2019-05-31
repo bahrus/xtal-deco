@@ -13,7 +13,7 @@
     "url": "git+https://github.com/bahrus/xtal-deco.git"
   },
   "dependencies": {
-    "trans-render": "0.0.111",
+    "trans-render": "0.0.112",
     "xtal-element": "0.0.59",
     "xtal-shell": "0.0.18"
   },
