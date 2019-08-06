@@ -58,6 +58,12 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     get decorateArgs() {
         return this._decorateArgs;
     }
+    get decoratorFn() {
+        return this._decoratorFn;
+    }
+    set decoratorFn(nv) {
+        this._decoratorFn = nv;
+    }
     attributeChangedCallback(n, ov, nv) {
         switch (n) {
             case use_symbols:
@@ -122,7 +128,7 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
         if (!this._decorateArgs && this._script) {
             this.evaluateCode(this._script);
         }
-        if (!this._c || this._nextSibling === null || this._decorateArgs === undefined)
+        if (!this._c || this._nextSibling === null || ((this._decorateArgs === undefined) && (this._decoratorFn === undefined)))
             return;
         let target = this._nextSibling;
         if (target === null) {
@@ -145,7 +151,12 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
         }
         const targets2 = targets !== undefined ? targets : [target];
         targets2.forEach(singleTarget => {
-            decorate(singleTarget, this._decorateArgs);
+            if (this._decorateArgs) {
+                decorate(singleTarget, this._decorateArgs);
+            }
+            else {
+                this._decoratorFn(singleTarget);
+            }
             const da = singleTarget.getAttribute('disabled');
             if (da !== null) {
                 if (da.length === 0 || da === "1") {

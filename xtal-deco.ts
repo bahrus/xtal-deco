@@ -60,9 +60,17 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
         this.attr(where_target_selector, val);
     }
 
-    _decorateArgs: DecorateArgs | undefined
+    _decorateArgs: DecorateArgs | undefined;
     get decorateArgs(){
-        return this._decorateArgs
+        return this._decorateArgs;
+    }
+
+    _decoratorFn!:  (target: HTMLElement) => void;
+    get decoratorFn(){
+        return this._decoratorFn;
+    }
+    set decoratorFn(nv){
+        this._decoratorFn = nv;
     }
 
     attributeChangedCallback(n: string, ov: string, nv: string){
@@ -137,7 +145,7 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
         if(!this._decorateArgs && this._script){
             this.evaluateCode(this._script)
         }
-        if(!this._c || this._nextSibling === null || this._decorateArgs === undefined) return;
+        if(!this._c || this._nextSibling === null || ((this._decorateArgs === undefined) && (this._decoratorFn === undefined))) return;
         let target : HTMLElement | null = this._nextSibling;
         
 
@@ -162,7 +170,11 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
         }
         const targets2 = targets !== undefined ? targets : [target];
         targets2.forEach(singleTarget =>{
-            decorate(singleTarget, this._decorateArgs!);
+            if(this._decorateArgs){
+                decorate(singleTarget, this._decorateArgs!);
+            }else{
+                this._decoratorFn(singleTarget);
+            }  
             const da = singleTarget.getAttribute('disabled');
             if(da !== null){
                 if(da.length === 0 ||da==="1"){
