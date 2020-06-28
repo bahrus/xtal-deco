@@ -19,7 +19,9 @@
   },
   "devDependencies": {
     "@webcomponents/webcomponentsjs": "2.4.3",
-    "xtal-test": "0.0.46"
+    "xtal-test": "0.0.46",
+    "p-et-alia": "0.0.105",
+    "es-module-shims": "0.4.7"
   },
   "author": "anderson.bruce.b@gmail.com",
   "license": "MIT",

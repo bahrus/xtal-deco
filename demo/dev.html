@@ -10,7 +10,6 @@
 
 <body>
     <div>
-        <xtal-sip><script nomodule>["p-d", "xtal-deco"]</script></xtal-sip>
         <xtal-deco use-symbols='["numberOfDrinksSold"]' attach-script><script nomodule>
             ({
                 on: {
@@ -43,14 +42,12 @@
             "imports": {
                 "xtal-element/": "../node_modules/xtal-element/",
                 "trans-render/": "../node_modules/trans-render/",
-                "xtal-sip": "https://cdn.jsdelivr.net/npm/xtal-sip@0.0.87/xtal-sip.js",
-                "p-d": "https://cdn.jsdelivr.net/npm/p-et-alia@0.0.4/p-d.js",
-                "xtal-deco": "../xtal-deco.js"
+                "p-et-alia/": "../node_modules/p-et-alia/"
             }
         }
         </script>
         <script type="module-shim">
-            import 'xtal-sip';
+            import '../xtal-deco.js';
         </script>
     </div>
 </body>
