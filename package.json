@@ -1,12 +1,13 @@
 {
   "name": "xtal-deco",
   "version": "0.0.5",
-  "description": "TBD",
+  "description": "Add properties / methods to other DOM (custom) elements.",
   "main": "xtal-deco.js",
   "module": "xtal-deco.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "node node_modules/xtal-test/serve.js"
+    "serve": "node node_modules/xtal-test/serve.js",
+    "doc": "wca analyze xtal-*.js --outFile custom-elements.json"
   },
   "repository": {
     "type": "git",

@@ -2,10 +2,9 @@ import { decorate } from 'trans-render/decorate.js';
 import { XtallatX, define } from 'xtal-element/xtal-latx.js';
 import { hydrate } from 'trans-render/hydrate.js';
 /**
- * `xtal-deco`
- *  Attach / override behavior onto the next element
+ * Attach / override behavior onto the next element
+ * @element xtal-deco
  *
- * @element 'xtal-deco'
  */
 let XtalDeco = /** @class */ (() => {
     class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
@@ -33,7 +32,7 @@ let XtalDeco = /** @class */ (() => {
                         self.targets = [_nextSibling];
                     }
                 },
-                ({ targets, _decorateArgs, decoratorFn }) => {
+                ({ targets, _decorateArgs, decoratorFn, self }) => {
                     if (!targets || (!_decorateArgs && !decoratorFn))
                         return;
                     targets.forEach(singleTarget => {
@@ -53,8 +52,8 @@ let XtalDeco = /** @class */ (() => {
                             }
                         }
                     });
-                    this._a = true;
-                    this.dataset.status = '📎'; //attached
+                    self._a = true;
+                    self.dataset.status = '📎'; //attached
                 }
             ];
         }

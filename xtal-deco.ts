@@ -1,13 +1,12 @@
-import {decorate} from 'trans-render/decorate.js';
+import { decorate } from 'trans-render/decorate.js';
 import { DecorateArgs } from "trans-render/types.d.js";
-import {XtallatX, define, AttributeProps, de} from 'xtal-element/xtal-latx.js';
-import {hydrate} from 'trans-render/hydrate.js';
+import { XtallatX, define, AttributeProps} from 'xtal-element/xtal-latx.js';
+import { hydrate } from 'trans-render/hydrate.js';
 
 /**
- * `xtal-deco`
- *  Attach / override behavior onto the next element
- *
- * @element 'xtal-deco'
+ * Attach / override behavior onto the next element
+ * @element xtal-deco
+ * 
  */
 export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
 
@@ -25,19 +24,22 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
 
     /**
      * Symbols to use for properties and methods
+     * @attr use-symbols
      */
     useSymbols: string[] | undefined;
 
     /**
      * Indicates there's script to attach.
+     * @attr attach-script
      */
     attachScript: boolean | undefined;
 
     _script!: HTMLScriptElement;
 
-    /** @type {string} 
+    /** 
      * Selector to search for within the next element. 
      * This will select the target elements(s) to which properties and methods will be attached.
+     * @attr where-target-selector
     */
     whereTargetSelector: string | undefined;
 
@@ -72,7 +74,7 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
             }
             
         },
-        ({targets, _decorateArgs, decoratorFn}: XtalDeco) => {
+        ({targets, _decorateArgs, decoratorFn, self}: XtalDeco) => {
             if(!targets || (!_decorateArgs && !decoratorFn)) return;
             targets.forEach(singleTarget =>{
                 if(_decorateArgs){
@@ -89,8 +91,8 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
                     }
                 }            
             });
-            this._a = true;
-            this.dataset.status = '📎'; //attached
+            self._a = true;
+            self.dataset.status = '📎'; //attached
         }
     ]
 
@@ -147,3 +149,8 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
 
 }
 define(XtalDeco);
+declare global {
+    interface HTMLElementTagNameMap {
+        "xtal-deco": XtalDeco,
+    }
+}
