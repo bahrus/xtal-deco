@@ -82,7 +82,7 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     }
     connectedCallback() {
         this.style.display = 'none';
-        this.propUp(['useSymbols', 'attachScript']);
+        this.__propUp(['useSymbols', 'attachScript']);
         this.getElement('_nextSibling', t => {
             let nextEl = t.nextElementSibling;
             ;

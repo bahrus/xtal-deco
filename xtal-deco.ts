@@ -1,6 +1,6 @@
 import {define} from 'trans-render/define.js';
 import {decorate} from 'trans-render/decorate.js';
-import { DecorateArgs } from "trans-render/init.d.js";
+import { DecorateArgs } from "trans-render/types.d.js";
 import {XtallatX} from 'xtal-element/xtal-latx.js';
 import {hydrate} from 'trans-render/hydrate.js';
 
@@ -92,7 +92,7 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     _c = false; //connected
     connectedCallback() {
         this.style.display = 'none';
-        this.propUp(['useSymbols', 'attachScript']);
+        this.__propUp(['useSymbols', 'attachScript']);
         this.getElement('_nextSibling', t => {
             let nextEl = t.nextElementSibling;;
             while(nextEl && nextEl.localName.indexOf('deco-') > -1){
