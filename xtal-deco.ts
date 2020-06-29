@@ -3,14 +3,26 @@ import { DecorateArgs } from "trans-render/types.d.js";
 import { XtallatX, define, AttributeProps} from 'xtal-element/xtal-latx.js';
 import { hydrate } from 'trans-render/hydrate.js';
 
+const onConnected = ({disabled, self}: XtalDeco) =>{
+    self.getElement('nextSiblingTarget', t => {
+        let nextEl = t.nextElementSibling;;
+        while(nextEl && nextEl.localName.indexOf('deco-') > -1){
+            nextEl = nextEl.nextElementSibling;
+        }
+        return nextEl as HTMLElement;
+    });
+};
+
 const onAttachScript = ({attachScript, self}: XtalDeco) => {
     if(attachScript !== null){
         self.getElement('scriptElement', t => t.querySelector('script'));
     }
 };
+
 const onScriptElement = ({scriptElement, self}: XtalDeco) => {
     self.evaluateCode(scriptElement);
 };
+
 const onNextSiblingTarget = ({nextSiblingTarget, whereTargetSelector, self}: XtalDeco) =>{
     if(nextSiblingTarget === null) return;
     if(whereTargetSelector){
@@ -19,6 +31,7 @@ const onNextSiblingTarget = ({nextSiblingTarget, whereTargetSelector, self}: Xta
         self.targets = [nextSiblingTarget];
     }
 };
+
 const onTargets = ({targets, decorateArgs, decoratorFn, self}: XtalDeco) => {
     if(!targets || (!decorateArgs && !decoratorFn)) return;
     targets.forEach(singleTarget =>{
@@ -49,10 +62,10 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
 
     static is = 'xtal-deco';
 
-    static attributeProps = ({useSymbols, attachScript, whereTargetSelector, decoratorFn,
+    static attributeProps = ({disabled, useSymbols, attachScript, whereTargetSelector, decoratorFn,
          scriptElement, decorateArgs: _decorateArgs, nextSiblingTarget, targets}: XtalDeco
     ) => ({
-        bool: [attachScript],
+        bool: [attachScript, disabled],
         obj: [useSymbols, decoratorFn, scriptElement, _decorateArgs, nextSiblingTarget, targets],
         str: [whereTargetSelector],
         jsonProp: [useSymbols]
@@ -91,24 +104,19 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     decoratorFn: undefined | ((target: HTMLElement) => void);
 
     propActions = [
+        onConnected,
         onAttachScript,
         onScriptElement,
         onNextSiblingTarget,
         onTargets,
     ]
 
- 
 
     connectedCallback() {
         this.style.display = 'none';
         super.connectedCallback();
-        this.getElement('nextSiblingTarget', t => {
-            let nextEl = t.nextElementSibling;;
-            while(nextEl && nextEl.localName.indexOf('deco-') > -1){
-                nextEl = nextEl.nextElementSibling;
-            }
-            return nextEl as HTMLElement;
-        });
+        this.disabled = this.disabled;
+
     }
 
 

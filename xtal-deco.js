@@ -1,6 +1,16 @@
 import { decorate } from 'trans-render/decorate.js';
 import { XtallatX, define } from 'xtal-element/xtal-latx.js';
 import { hydrate } from 'trans-render/hydrate.js';
+const onConnected = ({ disabled, self }) => {
+    self.getElement('nextSiblingTarget', t => {
+        let nextEl = t.nextElementSibling;
+        ;
+        while (nextEl && nextEl.localName.indexOf('deco-') > -1) {
+            nextEl = nextEl.nextElementSibling;
+        }
+        return nextEl;
+    });
+};
 const onAttachScript = ({ attachScript, self }) => {
     if (attachScript !== null) {
         self.getElement('scriptElement', t => t.querySelector('script'));
@@ -52,6 +62,7 @@ let XtalDeco = /** @class */ (() => {
             super(...arguments);
             this.nextSiblingTarget = null;
             this.propActions = [
+                onConnected,
                 onAttachScript,
                 onScriptElement,
                 onNextSiblingTarget,
@@ -61,14 +72,7 @@ let XtalDeco = /** @class */ (() => {
         connectedCallback() {
             this.style.display = 'none';
             super.connectedCallback();
-            this.getElement('nextSiblingTarget', t => {
-                let nextEl = t.nextElementSibling;
-                ;
-                while (nextEl && nextEl.localName.indexOf('deco-') > -1) {
-                    nextEl = nextEl.nextElementSibling;
-                }
-                return nextEl;
-            });
+            this.disabled = this.disabled;
         }
         getElement(fieldName, getter) {
             this[fieldName] = getter(this);
@@ -102,8 +106,8 @@ let XtalDeco = /** @class */ (() => {
         }
     }
     XtalDeco.is = 'xtal-deco';
-    XtalDeco.attributeProps = ({ useSymbols, attachScript, whereTargetSelector, decoratorFn, scriptElement, decorateArgs: _decorateArgs, nextSiblingTarget, targets }) => ({
-        bool: [attachScript],
+    XtalDeco.attributeProps = ({ disabled, useSymbols, attachScript, whereTargetSelector, decoratorFn, scriptElement, decorateArgs: _decorateArgs, nextSiblingTarget, targets }) => ({
+        bool: [attachScript, disabled],
         obj: [useSymbols, decoratorFn, scriptElement, _decorateArgs, nextSiblingTarget, targets],
         str: [whereTargetSelector],
         jsonProp: [useSymbols]
