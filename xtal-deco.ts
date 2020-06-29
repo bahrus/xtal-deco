@@ -5,7 +5,7 @@ import { hydrate } from 'trans-render/hydrate.js';
 
 const onAttachScript = ({attachScript, self}: XtalDeco) => {
     if(attachScript !== null){
-        self.getElement('_script', t => t.querySelector('script'));
+        self.getElement('scriptElement', t => t.querySelector('script'));
     }
 };
 const onScriptElement = ({scriptElement, self}: XtalDeco) => {
@@ -102,7 +102,7 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     connectedCallback() {
         this.style.display = 'none';
         super.connectedCallback();
-        this.getElement('_nextSibling', t => {
+        this.getElement('nextSiblingTarget', t => {
             let nextEl = t.nextElementSibling;;
             while(nextEl && nextEl.localName.indexOf('deco-') > -1){
                 nextEl = nextEl.nextElementSibling;

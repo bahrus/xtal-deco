@@ -1,6 +1,46 @@
 import { decorate } from 'trans-render/decorate.js';
 import { XtallatX, define } from 'xtal-element/xtal-latx.js';
 import { hydrate } from 'trans-render/hydrate.js';
+const onAttachScript = ({ attachScript, self }) => {
+    if (attachScript !== null) {
+        self.getElement('scriptElement', t => t.querySelector('script'));
+    }
+};
+const onScriptElement = ({ scriptElement, self }) => {
+    self.evaluateCode(scriptElement);
+};
+const onNextSiblingTarget = ({ nextSiblingTarget, whereTargetSelector, self }) => {
+    if (nextSiblingTarget === null)
+        return;
+    if (whereTargetSelector) {
+        self.getTargets(whereTargetSelector, nextSiblingTarget);
+    }
+    else {
+        self.targets = [nextSiblingTarget];
+    }
+};
+const onTargets = ({ targets, decorateArgs, decoratorFn, self }) => {
+    if (!targets || (!decorateArgs && !decoratorFn))
+        return;
+    targets.forEach(singleTarget => {
+        if (decorateArgs) {
+            decorate(singleTarget, decorateArgs);
+        }
+        else if (decoratorFn !== undefined) {
+            decoratorFn(singleTarget);
+        }
+        const da = singleTarget.getAttribute('disabled');
+        if (da !== null) {
+            if (da.length === 0 || da === "1") {
+                singleTarget.removeAttribute('disabled');
+            }
+            else {
+                singleTarget.setAttribute('disabled', (parseInt(da) - 1).toString());
+            }
+        }
+    });
+    self.dataset.status = '📎'; //attached
+};
 /**
  * Attach / override behavior onto the next element
  * @element xtal-deco
@@ -10,57 +50,18 @@ let XtalDeco = /** @class */ (() => {
     class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
         constructor() {
             super(...arguments);
-            this._nextSibling = null;
-            this._c = false; //connected
-            this._a = false; //attached
+            this.nextSiblingTarget = null;
             this.propActions = [
-                ({ attachScript }) => {
-                    if (attachScript !== null) {
-                        this.getElement('_script', t => t.querySelector('script'));
-                    }
-                },
-                ({ _script, self }) => {
-                    self.evaluateCode(_script);
-                },
-                ({ _nextSibling, whereTargetSelector, self }) => {
-                    if (_nextSibling === null)
-                        return;
-                    if (whereTargetSelector) {
-                        self.getTargets(whereTargetSelector, _nextSibling);
-                    }
-                    else {
-                        self.targets = [_nextSibling];
-                    }
-                },
-                ({ targets, _decorateArgs, decoratorFn, self }) => {
-                    if (!targets || (!_decorateArgs && !decoratorFn))
-                        return;
-                    targets.forEach(singleTarget => {
-                        if (_decorateArgs) {
-                            decorate(singleTarget, _decorateArgs);
-                        }
-                        else if (decoratorFn !== undefined) {
-                            decoratorFn(singleTarget);
-                        }
-                        const da = singleTarget.getAttribute('disabled');
-                        if (da !== null) {
-                            if (da.length === 0 || da === "1") {
-                                singleTarget.removeAttribute('disabled');
-                            }
-                            else {
-                                singleTarget.setAttribute('disabled', (parseInt(da) - 1).toString());
-                            }
-                        }
-                    });
-                    self._a = true;
-                    self.dataset.status = '📎'; //attached
-                }
+                onAttachScript,
+                onScriptElement,
+                onNextSiblingTarget,
+                onTargets,
             ];
         }
         connectedCallback() {
             this.style.display = 'none';
             super.connectedCallback();
-            this.getElement('_nextSibling', t => {
+            this.getElement('nextSiblingTarget', t => {
                 let nextEl = t.nextElementSibling;
                 ;
                 while (nextEl && nextEl.localName.indexOf('deco-') > -1) {
@@ -68,7 +69,6 @@ let XtalDeco = /** @class */ (() => {
                 }
                 return nextEl;
             });
-            this._c = true;
         }
         getElement(fieldName, getter) {
             this[fieldName] = getter(this);
@@ -88,7 +88,7 @@ let XtalDeco = /** @class */ (() => {
             const evalObj = new Function(funS)()();
             evalObj.propDefs = evalObj.props;
             evalObj.propVals = evalObj.vals;
-            this._decorateArgs = evalObj;
+            this.decorateArgs = evalObj;
         }
         getTargets(whereTargetSelector, nextSibling) {
             const targets = Array.from(nextSibling.querySelectorAll(whereTargetSelector));
@@ -102,9 +102,9 @@ let XtalDeco = /** @class */ (() => {
         }
     }
     XtalDeco.is = 'xtal-deco';
-    XtalDeco.attributeProps = ({ useSymbols, attachScript, whereTargetSelector, decoratorFn, _script, _decorateArgs, _nextSibling, targets }) => ({
+    XtalDeco.attributeProps = ({ useSymbols, attachScript, whereTargetSelector, decoratorFn, scriptElement, decorateArgs: _decorateArgs, nextSiblingTarget, targets }) => ({
         bool: [attachScript],
-        obj: [useSymbols, decoratorFn, _script, _decorateArgs, _nextSibling, targets],
+        obj: [useSymbols, decoratorFn, scriptElement, _decorateArgs, nextSiblingTarget, targets],
         str: [whereTargetSelector],
         jsonProp: [useSymbols]
     });
