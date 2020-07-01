@@ -1,7 +1,7 @@
 import { decorate } from 'trans-render/decorate.js';
 import { XtallatX, define } from 'xtal-element/xtal-latx.js';
 import { hydrate } from 'trans-render/hydrate.js';
-const onConnected = ({ disabled, self }) => {
+const linkNextSiblingTarget = ({ self }) => {
     self.getElement('nextSiblingTarget', t => {
         let nextEl = t.nextElementSibling;
         ;
@@ -11,15 +11,23 @@ const onConnected = ({ disabled, self }) => {
         return nextEl;
     });
 };
-const onAttachScript = ({ attachScript, self }) => {
+const linkScriptElement = ({ attachScript, self }) => {
     if (attachScript !== null) {
         self.getElement('scriptElement', t => t.querySelector('script'));
     }
 };
-const onScriptElement = ({ scriptElement, self }) => {
-    self.evaluateCode(scriptElement);
+const linkDecorateArgs = ({ scriptElement, self, useSymbols }) => {
+    const symbols = useSymbols ? useSymbols.map(symbol => `const ${symbol} = Symbol('${symbol}');`).join('') : '';
+    const funS = `return function(){
+        ${symbols} 
+        return ${scriptElement.innerHTML.trim()};
+    }`;
+    const evalObj = new Function(funS)()();
+    evalObj.propDefs = evalObj.props;
+    evalObj.propVals = evalObj.vals;
+    self.decorateArgs = evalObj;
 };
-const onNextSiblingTarget = ({ nextSiblingTarget, whereTargetSelector, self }) => {
+const linkTargets = ({ nextSiblingTarget, whereTargetSelector, self }) => {
     if (nextSiblingTarget === null)
         return;
     if (whereTargetSelector) {
@@ -29,7 +37,7 @@ const onNextSiblingTarget = ({ nextSiblingTarget, whereTargetSelector, self }) =
         self.targets = [nextSiblingTarget];
     }
 };
-const onTargets = ({ targets, decorateArgs, decoratorFn, self }) => {
+const applyDecoration = ({ targets, decorateArgs, decoratorFn, self }) => {
     if (!targets || (!decorateArgs && !decoratorFn))
         return;
     targets.forEach(singleTarget => {
@@ -62,37 +70,28 @@ let XtalDeco = /** @class */ (() => {
             super(...arguments);
             this.nextSiblingTarget = null;
             this.propActions = [
-                onConnected,
-                onAttachScript,
-                onScriptElement,
-                onNextSiblingTarget,
-                onTargets,
+                linkNextSiblingTarget,
+                linkScriptElement,
+                linkDecorateArgs,
+                linkTargets,
+                applyDecoration,
             ];
         }
         connectedCallback() {
             this.style.display = 'none';
             super.connectedCallback();
-            this.disabled = this.disabled;
+            linkNextSiblingTarget(this);
         }
         getElement(fieldName, getter) {
             this[fieldName] = getter(this);
             if (!this[fieldName]) {
                 setTimeout(() => {
                     this.getElement(fieldName, getter);
-                });
+                }, 10);
                 return;
             }
         }
         evaluateCode(scriptElement) {
-            const symbols = this.useSymbols ? this.useSymbols.map(symbol => `const ${symbol} = Symbol('${symbol}');`).join('') : '';
-            const funS = `return function(){
-            ${symbols} 
-            return ${scriptElement.innerHTML.trim()};
-        }`;
-            const evalObj = new Function(funS)()();
-            evalObj.propDefs = evalObj.props;
-            evalObj.propVals = evalObj.vals;
-            this.decorateArgs = evalObj;
         }
         getTargets(whereTargetSelector, nextSibling) {
             const targets = Array.from(nextSibling.querySelectorAll(whereTargetSelector));

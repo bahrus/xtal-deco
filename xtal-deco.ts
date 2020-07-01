@@ -3,7 +3,7 @@ import { DecorateArgs } from "trans-render/types.d.js";
 import { XtallatX, define, AttributeProps} from 'xtal-element/xtal-latx.js';
 import { hydrate } from 'trans-render/hydrate.js';
 
-const onConnected = ({disabled, self}: XtalDeco) =>{
+const linkNextSiblingTarget = ({self}: XtalDeco) =>{
     self.getElement('nextSiblingTarget', t => {
         let nextEl = t.nextElementSibling;;
         while(nextEl && nextEl.localName.indexOf('deco-') > -1){
@@ -13,17 +13,25 @@ const onConnected = ({disabled, self}: XtalDeco) =>{
     });
 };
 
-const onAttachScript = ({attachScript, self}: XtalDeco) => {
+const linkScriptElement = ({attachScript, self}: XtalDeco) => {
     if(attachScript !== null){
         self.getElement('scriptElement', t => t.querySelector('script'));
     }
 };
 
-const onScriptElement = ({scriptElement, self}: XtalDeco) => {
-    self.evaluateCode(scriptElement);
+const linkDecorateArgs = ({scriptElement, self, useSymbols}: XtalDeco) => {
+    const symbols = useSymbols ? useSymbols.map(symbol => `const ${symbol} = Symbol('${symbol}');`).join('')  : '';
+    const funS = `return function(){
+        ${symbols} 
+        return ${scriptElement.innerHTML.trim()};
+    }`;
+    const evalObj = new Function(funS)()();
+    evalObj.propDefs = evalObj.props;
+    evalObj.propVals = evalObj.vals;
+    self.decorateArgs = evalObj;
 };
 
-const onNextSiblingTarget = ({nextSiblingTarget, whereTargetSelector, self}: XtalDeco) =>{
+const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: XtalDeco) => {
     if(nextSiblingTarget === null) return;
     if(whereTargetSelector){
         self.getTargets(whereTargetSelector, nextSiblingTarget);
@@ -32,7 +40,7 @@ const onNextSiblingTarget = ({nextSiblingTarget, whereTargetSelector, self}: Xta
     }
 };
 
-const onTargets = ({targets, decorateArgs, decoratorFn, self}: XtalDeco) => {
+const applyDecoration = ({targets, decorateArgs, decoratorFn, self}: XtalDeco) => {
     if(!targets || (!decorateArgs && !decoratorFn)) return;
     targets.forEach(singleTarget =>{
         if(decorateArgs){
@@ -104,19 +112,18 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     decoratorFn: undefined | ((target: HTMLElement) => void);
 
     propActions = [
-        onConnected,
-        onAttachScript,
-        onScriptElement,
-        onNextSiblingTarget,
-        onTargets,
+        linkNextSiblingTarget,
+        linkScriptElement,
+        linkDecorateArgs,
+        linkTargets,
+        applyDecoration,
     ]
 
 
     connectedCallback() {
         this.style.display = 'none';
         super.connectedCallback();
-        this.disabled = this.disabled;
-
+        linkNextSiblingTarget(this);
     }
 
 
@@ -125,21 +132,13 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
         if(!(<any>this)[fieldName]){
             setTimeout(() =>{
                 this.getElement(fieldName, getter);
-            })
+            }, 10);
             return;
         }
     }
 
     evaluateCode(scriptElement: HTMLScriptElement) {
-        const symbols = this.useSymbols ? this.useSymbols.map(symbol => `const ${symbol} = Symbol('${symbol}');`).join('')  : '';
-        const funS = `return function(){
-            ${symbols} 
-            return ${scriptElement.innerHTML.trim()};
-        }`;
-        const evalObj = new Function(funS)()();
-        evalObj.propDefs = evalObj.props;
-        evalObj.propVals = evalObj.vals;
-        this.decorateArgs = evalObj;
+
         
 
     }
