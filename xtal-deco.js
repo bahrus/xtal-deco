@@ -91,8 +91,6 @@ let XtalDeco = /** @class */ (() => {
                 return;
             }
         }
-        evaluateCode(scriptElement) {
-        }
         getTargets(whereTargetSelector, nextSibling) {
             const targets = Array.from(nextSibling.querySelectorAll(whereTargetSelector));
             if (targets.length === 0) {
