@@ -137,11 +137,7 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
         }
     }
 
-    evaluateCode(scriptElement: HTMLScriptElement) {
 
-        
-
-    }
 
     getTargets(whereTargetSelector: string, nextSibling: HTMLElement){
         const targets = Array.from(nextSibling.querySelectorAll(whereTargetSelector));

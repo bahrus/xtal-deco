@@ -82,3 +82,33 @@ If you really want to play it safe, there is an attribute, "use-symbols", which 
 ```
 
 I *think* using property and method names starting with an underscore should also allow you to steer clear of the dementors. That would be easier than working with symbols.
+
+The syntax shown above, where the decorating behavior is defined within a script tag (with nomodule attribute) may not make sense in an environment where content is delivered via JS imports.
+
+In this environment, but way xtal-deco should be used is via inheritance:
+
+```JavaScript
+class XtalDecoMyUseCase extends XtalDeco{
+    decorateArgs = {
+        on: {
+            click: function (e) {
+                alert(this.dataset.drinkSelection + ' coming right up!');
+                this[numberOfDrinksSold]++;
+            }
+        },
+        props: {
+            [numberOfDrinksSold]: 0,
+        },
+        methods:{
+            onPropsChange: function () {
+                console.log('Thanks, Rosmerta');
+            }
+        },
+        vals:{
+            title: 'Clicker',
+        }        
+    }
+}
+customElements.define('xtal-deco-my-use-case', XtalDecoMyUseCase);
+```
+
