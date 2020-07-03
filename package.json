@@ -1,6 +1,6 @@
 {
   "name": "xtal-deco",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Add properties / methods to other DOM (custom) elements.",
   "main": "xtal-deco.js",
   "module": "xtal-deco.js",
