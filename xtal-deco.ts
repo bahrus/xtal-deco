@@ -71,10 +71,10 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     static is = 'xtal-deco';
 
     static attributeProps = ({disabled, useSymbols, attachScript, whereTargetSelector, decoratorFn,
-         scriptElement, decorateArgs: _decorateArgs, nextSiblingTarget, targets}: XtalDeco
+         scriptElement, decorateArgs, nextSiblingTarget, targets}: XtalDeco
     ) => ({
         bool: [attachScript, disabled],
-        obj: [useSymbols, decoratorFn, scriptElement, _decorateArgs, nextSiblingTarget, targets],
+        obj: [useSymbols, decoratorFn, scriptElement, decorateArgs, nextSiblingTarget, targets],
         str: [whereTargetSelector],
         jsonProp: [useSymbols]
     } as AttributeProps);
