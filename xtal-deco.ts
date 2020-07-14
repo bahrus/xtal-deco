@@ -3,7 +3,7 @@ import { DecorateArgs } from "trans-render/types.d.js";
 import { XtallatX, define, AttributeProps} from 'xtal-element/xtal-latx.js';
 import { hydrate } from 'trans-render/hydrate.js';
 
-const linkNextSiblingTarget = ({self}: XtalDeco) =>{
+export const linkNextSiblingTarget = ({self}: XtalDeco) =>{
     self.getElement('nextSiblingTarget', t => {
         let nextEl = t.nextElementSibling;;
         while(nextEl && nextEl.localName.indexOf('deco-') > -1){
@@ -13,13 +13,13 @@ const linkNextSiblingTarget = ({self}: XtalDeco) =>{
     });
 };
 
-const linkScriptElement = ({attachScript, self}: XtalDeco) => {
+export const linkScriptElement = ({attachScript, self}: XtalDeco) => {
     if(attachScript !== null){
         self.getElement('scriptElement', t => t.querySelector('script'));
     }
 };
 
-const linkDecorateArgs = ({scriptElement, self, useSymbols}: XtalDeco) => {
+export const linkDecorateArgs = ({scriptElement, self, useSymbols}: XtalDeco) => {
     const symbols = useSymbols ? useSymbols.map(symbol => `const ${symbol} = Symbol('${symbol}');`).join('')  : '';
     const funS = `return function(){
         ${symbols} 
@@ -31,7 +31,7 @@ const linkDecorateArgs = ({scriptElement, self, useSymbols}: XtalDeco) => {
     self.decorateArgs = evalObj;
 };
 
-const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: XtalDeco) => {
+export const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: XtalDeco) => {
     if(nextSiblingTarget === null) return;
     if(whereTargetSelector){
         self.getTargets(whereTargetSelector, nextSiblingTarget);
@@ -40,7 +40,7 @@ const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: XtalDeco) =
     }
 };
 
-const applyDecoration = ({targets, decorateArgs, decoratorFn, self}: XtalDeco) => {
+export const applyDecoration = ({targets, decorateArgs, decoratorFn, self}: XtalDeco) => {
     if(!targets || (!decorateArgs && !decoratorFn)) return;
     targets.forEach(singleTarget =>{
         if(decorateArgs){
