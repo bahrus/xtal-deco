@@ -11,25 +11,28 @@
 <body>
     <div>
         <xtal-deco><script nomodule type="module ish">
-            const decoEl = window["module ish"].parentElement;
-            decoEl.actions = [
-                ({count}) => {
-                    window.alert(count + " butterbeers sold");
-                }
-            ]
-            decoEl.on = {
-                'click': ({self}) => {
-                    console.log(self);
-                    self.count++;
+            const decoProps = {
+                actions: [
+                    ({count}) => {
+                        window.alert(count + " butterbeers sold");
+                        window.dispatchEvent('count-changed');
+                    }
+                ],
+                on: {
+                    'click': ({self}) => {
+                        self.count++;
+                    }
+                },
+                init: ({self}) =>{
+                    self.count = 0;
                 }
             }
-            decoEl.init = ({self}) =>{
-                self.count = 0;
-            };
+            const decoEl = window["module ish"].parentElement;
+            Object.assign(decoEl, decoProps);
 
         </script></xtal-deco>
         <button disabled data-drink-selection="Butterbeer">Click me to Order Your Drink</button>
-        <p-d on="Symbol-numberOfDrinksSold-changed" prop="textContent" val="detail.value"></p-d>
+        <p-d on="count-changed" prop=textContent val=target.count></p-d>
         <span></span> drinks sold.
         
         <script defer src="https://cdn.jsdelivr.net/npm/es-module-shims@0.2.7/dist/es-module-shims.js"></script>

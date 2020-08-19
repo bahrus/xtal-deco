@@ -14,12 +14,12 @@ The affected element can be a native DOM element, or a custom element instances.
 
 xtal-deco attaches an [ES6 proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
 
-xtal-deco has a property, "proxyActions" that allows for a "reactive" way of responding to property changes.
+xtal-deco has a property, "actions" that allows for a "reactive" way of responding to property changes.
 
 proxyPropActions is an array of arrow functions, where the target element is passed in.  It is expected that the arrow function will use destructuring:
 
-```
-proxyPropActions = [
+``` JavaScript
+actions: [
     ({textContent, myProp}) =>{
         //do something
     }
