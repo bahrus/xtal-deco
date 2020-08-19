@@ -34,6 +34,8 @@ export const linkProxies = ({ targets, actions, self }) => {
         const proxy = new Proxy(proxyTarget, {
             set: (target, key, value) => {
                 target[key] = value;
+                if (key === 'self')
+                    return true;
                 actions.forEach(action => {
                     const dependencies = deconstruct(action);
                     if (dependencies.includes(key)) { //TODO:  symbols

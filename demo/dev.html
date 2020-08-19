@@ -13,9 +13,9 @@
         <xtal-deco><script nomodule type="module ish">
             const decoProps = {
                 actions: [
-                    ({count}) => {
+                    ({count, self}) => {
                         window.alert(count + " butterbeers sold");
-                        window.dispatchEvent('count-changed');
+                        self.dispatchEvent(new Event('count-changed'));
                     }
                 ],
                 on: {

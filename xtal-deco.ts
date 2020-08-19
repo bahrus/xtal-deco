@@ -36,6 +36,7 @@ export const linkProxies = ({targets, actions, self}: XtalDeco) => {
         const proxy = new Proxy(proxyTarget, {
             set: (target: any, key, value) => {
                 target[key] = value;
+                if(key === 'self') return true;
                 actions.forEach(action =>{
                     const dependencies = deconstruct(action);
                     if(dependencies.includes(key as string)){ //TODO:  symbols
