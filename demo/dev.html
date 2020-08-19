@@ -10,27 +10,18 @@
 
 <body>
     <div>
-        <xtal-deco use-symbols='["numberOfDrinksSold"]' attach-script><script nomodule>
-            ({
-                on: {
-                    click: function (e) {
-                        alert(this.dataset.drinkSelection + ' coming right up!');
-                        this[numberOfDrinksSold]++;
-                    }
-                },
-                props: {
-                    [numberOfDrinksSold]: 0,
-                    message: ''
-                },
-                methods:{
-                    onPropsChange: function () {
-                        console.log('Thanks, Rosmerta');
-                    }
-                },
-                vals:{
-                    title: 'Clicker',
+        <xtal-deco><script nomodule type="module ish">
+            const decoEl = window["module ish"].parentElement;
+            decoEl.actions = [
+                ({count}) => {
+                    window.alert(count + " butterbeers sold");
                 }
-            })
+            ]
+            decoEl.init = ({self}) =>{
+                console.log(self);
+                self.count = 0;
+            };
+
         </script></xtal-deco>
         <button disabled data-drink-selection="Butterbeer">Click me to Order Your Drink</button>
         <p-d on="Symbol-numberOfDrinksSold-changed" prop="textContent" val="detail.value"></p-d>
@@ -42,13 +33,16 @@
             "imports": {
                 "xtal-element/": "../node_modules/xtal-element/",
                 "trans-render/": "../node_modules/trans-render/",
-                "p-et-alia/": "../node_modules/p-et-alia/"
+                "p-et-alia/": "../node_modules/p-et-alia/",
+                "nomodule/": "../node_modules/nomodule/",
+                "css-observe/": "../node_modules/css-observe/"
             }
         }
         </script>
         <script type="module-shim">
             import '../xtal-deco.js';
             import 'p-et-alia/p-d.js';
+            import 'nomodule/no-module.js';
         </script>
     </div>
 </body>

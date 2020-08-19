@@ -1,64 +1,87 @@
-import { decorate } from 'trans-render/plugins/decorate.js';
-import { XtallatX, define } from 'xtal-element/xtal-latx.js';
+// import { decorate } from 'trans-render/plugins/decorate.js';
+// import { DecorateArgs } from "trans-render/types.d.js";
+import { XtallatX, define, deconstruct } from 'xtal-element/xtal-latx.js';
 import { hydrate } from 'trans-render/hydrate.js';
 export const linkNextSiblingTarget = ({ self }) => {
-    self.getElement('nextSiblingTarget', t => {
-        let nextEl = t.nextElementSibling;
-        ;
-        while (nextEl && nextEl.localName.indexOf('deco-') > -1) {
-            nextEl = nextEl.nextElementSibling;
-        }
-        return nextEl;
-    });
-};
-export const linkScriptElement = ({ attachScript, self }) => {
-    if (attachScript !== null) {
-        self.getElement('scriptElement', t => t.querySelector('script'));
+    let nextEl = self;
+    while (nextEl && (nextEl.localName.indexOf('-deco') > -1)) {
+        nextEl = nextEl.nextElementSibling;
     }
-};
-export const linkDecorateArgs = ({ scriptElement, self, useSymbols }) => {
-    const symbols = useSymbols ? useSymbols.map(symbol => `const ${symbol} = Symbol('${symbol}');`).join('') : '';
-    const funS = `return function(){
-        ${symbols} 
-        return ${scriptElement.innerHTML.trim()};
-    }`;
-    const evalObj = new Function(funS)()();
-    evalObj.propDefs = evalObj.props;
-    evalObj.propVals = evalObj.vals;
-    self.decorateArgs = evalObj;
+    if (!nextEl) {
+        setTimeout(() => {
+            linkNextSiblingTarget(self);
+        }, 50);
+        return;
+    }
+    self.nextSiblingTarget = nextEl;
 };
 export const linkTargets = ({ nextSiblingTarget, whereTargetSelector, self }) => {
     if (nextSiblingTarget === null)
         return;
     if (whereTargetSelector) {
-        self.getTargets(whereTargetSelector, nextSiblingTarget);
+        //self.getTargets(whereTargetSelector, nextSiblingTarget);
+        self.targets = Array.from(nextSiblingTarget.querySelectorAll(whereTargetSelector));
     }
     else {
         self.targets = [nextSiblingTarget];
     }
 };
-export const applyDecoration = ({ targets, decorateArgs, decoratorFn, self }) => {
-    if (!targets || (!decorateArgs && !decoratorFn))
+export const linkProxies = ({ targets, actions, self }) => {
+    if (targets === undefined || actions === undefined)
         return;
-    targets.forEach(singleTarget => {
-        if (decorateArgs) {
-            decorate(singleTarget, decorateArgs);
-        }
-        else if (decoratorFn !== undefined) {
-            decoratorFn(singleTarget);
-        }
-        const da = singleTarget.getAttribute('disabled');
-        if (da !== null) {
-            if (da.length === 0 || da === "1") {
-                singleTarget.removeAttribute('disabled');
+    self.proxies = [];
+    targets.forEach(proxyTarget => {
+        const proxy = new Proxy(proxyTarget, {
+            set: (target, key, value) => {
+                target[key] = value;
+                actions.forEach(action => {
+                    const dependencies = deconstruct(action);
+                    if (dependencies.includes(key)) { //TODO:  symbols
+                        const prevSelf = target.self;
+                        target.self = target;
+                        action(target);
+                        target.self = prevSelf;
+                    }
+                });
+                return true;
             }
-            else {
-                singleTarget.setAttribute('disabled', (parseInt(da) - 1).toString());
-            }
-        }
+        });
+        self.proxies.push(proxy);
     });
-    self.dataset.status = '📎'; //attached
 };
+export const linkHandlers = ({ targets, on, self }) => {
+    if (targets === undefined || on === undefined)
+        return;
+    const handlers = {};
+    for (var key in on) {
+        const eventSetting = on[key];
+        switch (typeof eventSetting) {
+            case 'function':
+                const targetHandlers = targets.map(target => {
+                    const handler = eventSetting.bind(target);
+                    target.addEventListener(key, handler);
+                    return handler;
+                });
+                handlers[key] = targetHandlers;
+                break;
+            default:
+                throw 'not implemented yet';
+        }
+    }
+    self.disconnect();
+    self.handlers = handlers;
+};
+export const doInit = ({ proxies, init }) => {
+    if (proxies === undefined || init === undefined)
+        return;
+    proxies.forEach((target) => {
+        const prevSelf = target.self;
+        target.self = target;
+        init(target);
+        target.self = prevSelf;
+    });
+};
+export const propActions = [linkNextSiblingTarget, linkTargets, linkProxies, linkHandlers, doInit];
 /**
  * Attach / override behavior onto the next element
  * @element xtal-deco
@@ -68,44 +91,33 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     constructor() {
         super(...arguments);
         this.nextSiblingTarget = null;
-        this.propActions = [
-            linkNextSiblingTarget,
-            linkScriptElement,
-            linkDecorateArgs,
-            linkTargets,
-            applyDecoration,
-        ];
+        this.propActions = propActions;
     }
     connectedCallback() {
         this.style.display = 'none';
         super.connectedCallback();
         linkNextSiblingTarget(this);
     }
-    getElement(fieldName, getter) {
-        this[fieldName] = getter(this);
-        if (!this[fieldName]) {
-            setTimeout(() => {
-                this.getElement(fieldName, getter);
-            }, 10);
-            return;
-        }
+    disconnectedCallback() {
+        this.disconnect();
     }
-    getTargets(whereTargetSelector, nextSibling) {
-        const targets = Array.from(nextSibling.querySelectorAll(whereTargetSelector));
-        if (targets.length === 0) {
-            setTimeout(() => {
-                this.getTargets(whereTargetSelector, nextSibling);
-            }, 50);
+    disconnect() {
+        if (this.targets === undefined || this.handlers === undefined)
             return;
-        }
-        this.targets = targets;
+        this.targets.forEach(target => {
+            for (const key in this.handlers) {
+                const targetHandlers = this.handlers[key];
+                targetHandlers.forEach(targetHandler => {
+                    target.removeEventListener(key, targetHandler);
+                });
+            }
+        });
     }
 }
 XtalDeco.is = 'xtal-deco';
-XtalDeco.attributeProps = ({ disabled, useSymbols, attachScript, whereTargetSelector, decoratorFn, scriptElement, decorateArgs, nextSiblingTarget, targets }) => ({
-    bool: [attachScript, disabled],
-    obj: [useSymbols, decoratorFn, scriptElement, decorateArgs, nextSiblingTarget, targets],
+XtalDeco.attributeProps = ({ disabled, whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies }) => ({
+    bool: [disabled],
+    obj: [nextSiblingTarget, targets, init, actions, proxies],
     str: [whereTargetSelector],
-    jsonProp: [useSymbols]
 });
 define(XtalDeco);

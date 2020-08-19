@@ -6,13 +6,33 @@
 
 Add properties / methods to other DOM (custom) elements.
 
+## Adding behavior to the next element instance with xtal-deco
+
 xtal-deco provides a way of adding behavior to the next sibling element -- "decorating" the element.  
 
 The affected element can be a native DOM element, or a custom element instances. 
 
-The syntax is heavily influenced by Vue / Polymer 1.
+xtal-deco attaches an [ES6 proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
 
-## Adding behavior to the next element instance with xtal-deco
+xtal-deco has a property, "proxyActions" that allows for a "reactive" way of responding to property changes.
+
+proxyPropActions is an array of arrow functions, where the target element is passed in.  It is expected that the arrow function will use destructuring:
+
+```
+proxyPropActions = [
+    ({textContent, myProp}) =>{
+        //do something
+    }
+]
+```
+
+## Setting proxyActions
+
+There are two straightforward ways of setting proxy actions, depending on your needs:
+
+1.  Extend class XtalDeco, and implement proxyActions, via the constructor or via [instanceFields](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Public_class_fields).
+2.  Inline proxy actions in the HTML markup.  Use something like [nomodule](https://github.com/bahrus/nomodule).
+
 
 Syntax example:
 
