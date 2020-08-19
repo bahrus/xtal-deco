@@ -44,25 +44,38 @@ export const linkProxies = ({ targets, actions, self }) => {
                     }
                 });
                 return true;
+            },
+            get: (obj, key) => {
+                let value = Reflect.get(obj, key);
+                if (typeof (value) == "function") {
+                    return value.bind(obj);
+                }
+                return value;
             }
         });
         self.proxies.push(proxy);
     });
 };
-export const linkHandlers = ({ targets, on, self }) => {
-    if (targets === undefined || on === undefined)
+export const linkHandlers = ({ proxies, on, self }) => {
+    if (proxies === undefined || on === undefined)
         return;
     const handlers = {};
     for (var key in on) {
         const eventSetting = on[key];
         switch (typeof eventSetting) {
             case 'function':
-                const targetHandlers = targets.map(target => {
-                    const handler = eventSetting.bind(target);
-                    target.addEventListener(key, handler);
-                    return handler;
+                const targetHandlers = proxies.map(target => {
+                    //const handler = eventSetting.bind(target);
+                    target.addEventListener(key, e => {
+                        const aTarget = target;
+                        const prevSelf = aTarget.self;
+                        aTarget.self = target;
+                        eventSetting(target, e);
+                        aTarget.self = prevSelf;
+                    });
+                    return eventSetting;
                 });
-                handlers[key] = targetHandlers;
+                //handlers[key] = targetHandlers;
                 break;
             default:
                 throw 'not implemented yet';
@@ -115,9 +128,9 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     }
 }
 XtalDeco.is = 'xtal-deco';
-XtalDeco.attributeProps = ({ disabled, whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies }) => ({
+XtalDeco.attributeProps = ({ disabled, whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on }) => ({
     bool: [disabled],
-    obj: [nextSiblingTarget, targets, init, actions, proxies],
+    obj: [nextSiblingTarget, targets, init, actions, proxies, on],
     str: [whereTargetSelector],
 });
 define(XtalDeco);

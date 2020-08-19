@@ -17,8 +17,13 @@
                     window.alert(count + " butterbeers sold");
                 }
             ]
+            decoEl.on = {
+                'click': ({self}) => {
+                    console.log(self);
+                    self.count++;
+                }
+            }
             decoEl.init = ({self}) =>{
-                console.log(self);
                 self.count = 0;
             };
 

@@ -46,6 +46,13 @@ export const linkProxies = ({targets, actions, self}: XtalDeco) => {
                     }
                 });
                 return true;
+            },
+            get:(obj,key)=>{
+                let value = Reflect.get(obj,key);
+                if(typeof(value) == "function"){
+                    return value.bind(obj);
+                }
+                return value;
             }
         });
         self.proxies!.push(proxy);
@@ -54,19 +61,26 @@ export const linkProxies = ({targets, actions, self}: XtalDeco) => {
 
 
 
-export const linkHandlers = ({targets, on, self}: XtalDeco) => {
-    if(targets === undefined || on === undefined) return;
+export const linkHandlers = ({proxies, on, self}: XtalDeco) => {
+    if(proxies === undefined || on === undefined) return;
     const handlers: eventHandlers = {};
     for(var key in on){
         const eventSetting = on[key];
         switch(typeof eventSetting){
             case 'function':
-                const targetHandlers = targets.map(target =>{
-                    const handler = eventSetting.bind(target);
-                    target.addEventListener(key, handler);
-                    return handler;
+                const targetHandlers = proxies.map(target =>{
+                    //const handler = eventSetting.bind(target);
+
+                    target.addEventListener(key, e => {
+                        const aTarget = target as any;
+                        const prevSelf = aTarget.self;
+                        aTarget.self = target;
+                        eventSetting(target, e);
+                        aTarget.self = prevSelf;
+                    });
+                    return eventSetting;
                 });
-                handlers[key] = targetHandlers;
+                //handlers[key] = targetHandlers;
                 break;
             default:
                 throw 'not implemented yet';
@@ -100,10 +114,10 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
 
     static is = 'xtal-deco';
 
-    static attributeProps = ({disabled,  whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies}: XtalDeco
+    static attributeProps = ({disabled,  whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on}: XtalDeco
    ) => ({
        bool: [disabled],
-       obj: [nextSiblingTarget, targets, init, actions, proxies],
+       obj: [nextSiblingTarget, targets, init, actions, proxies, on],
        str: [whereTargetSelector],
    } as AttributeProps);
 
