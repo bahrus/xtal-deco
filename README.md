@@ -76,8 +76,17 @@ Give the proxy a name:
 ```html
 <xtal-deco ish="myDecorator"></xtal-deco>
 <button id=myButton></button>
+```
+
+Then to access the proxy, do:
+
+```html
+<xtal-deco ish="myDecorator"></xtal-deco>
+<button id=myButton></button>
 <script>
-const proxy = myButton[Symbol.for('myDecorator')]
+ish.get(myButton, 'myDecorator').then(proxy => {
+    //do something to the proxy
+})
 </script>
 ```
 
