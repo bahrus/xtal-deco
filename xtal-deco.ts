@@ -139,7 +139,7 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
 
     propActions = propActions;
 
-    actions: PropAction[] | undefined;
+    actions: PropAction<this>[] | undefined;
 
     init: PropAction | undefined;
 
