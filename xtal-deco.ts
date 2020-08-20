@@ -31,7 +31,7 @@ export const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: Xtal
 
 export const linkProxies = ({targets, actions, self}: XtalDeco) => {
     if(targets === undefined || actions === undefined) return;
-    const proxies = [];
+    const proxies: Element[] = [];
     targets.forEach(proxyTarget =>{
         const proxy = new Proxy(proxyTarget, {
             set: (target: any, key, value) => {
