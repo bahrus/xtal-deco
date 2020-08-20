@@ -65,6 +65,22 @@ Syntax example:
 
 ```
 
+## Ish [TODO]
+
+Direct access to the target element (button in the example above) bypasses the proxy.
+
+To allow access to the proxy from the target element:
+
+Give the proxy a name:
+
+```html
+<xtal-deco ish="myDecorator"></xtal-deco>
+<button id=myButton></button>
+<script>
+const proxy = myButton[Symbol.for('myDecorator')]
+</script>
+```
+
 ## Running locally
 
 ```
