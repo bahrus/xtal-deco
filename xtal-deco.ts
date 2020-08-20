@@ -17,7 +17,7 @@ export const linkNextSiblingTarget = ({self}: XtalDeco) => {
     self.nextSiblingTarget = nextEl;
 };
 
-export const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: XtalDeco) => {
+export const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: XtalDeco<HTMLElement>) => {
     if(nextSiblingTarget === null) return;
     if(whereTargetSelector){
         //self.getTargets(whereTargetSelector, nextSiblingTarget);
@@ -31,7 +31,7 @@ export const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: Xtal
 
 export const linkProxies = ({targets, actions, self}: XtalDeco) => {
     if(targets === undefined || actions === undefined) return;
-    self.proxies = [];
+    const proxies = [];
     targets.forEach(proxyTarget =>{
         const proxy = new Proxy(proxyTarget, {
             set: (target: any, key, value) => {
@@ -56,8 +56,9 @@ export const linkProxies = ({targets, actions, self}: XtalDeco) => {
                 return value;
             }
         });
-        self.proxies!.push(proxy);
-    })
+        proxies.push(proxy);
+    });
+    self.proxies = proxies;
 }
 
 
@@ -111,7 +112,7 @@ type eventHandlers = {[key: string]: ((e: Event) => void)[]};
  * @element xtal-deco
  * 
  */
-export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
+export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends XtallatX(hydrate(HTMLElement)) {
 
     static is = 'xtal-deco';
 
@@ -137,11 +138,11 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
 
     proxies: Element[] | undefined;
 
-    propActions = propActions;
+    propActions = propActions as PropAction<any>[];
 
-    actions: PropAction<this>[] | undefined;
+    actions: PropAction<any>[] | undefined;
 
-    init: PropAction | undefined;
+    init: PropAction<TTargetElement> | undefined;
 
     on: EventSettings | undefined;
 

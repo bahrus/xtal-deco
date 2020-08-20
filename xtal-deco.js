@@ -29,7 +29,7 @@ export const linkTargets = ({ nextSiblingTarget, whereTargetSelector, self }) =>
 export const linkProxies = ({ targets, actions, self }) => {
     if (targets === undefined || actions === undefined)
         return;
-    self.proxies = [];
+    const proxies = [];
     targets.forEach(proxyTarget => {
         const proxy = new Proxy(proxyTarget, {
             set: (target, key, value) => {
@@ -55,8 +55,9 @@ export const linkProxies = ({ targets, actions, self }) => {
                 return value;
             }
         });
-        self.proxies.push(proxy);
+        proxies.push(proxy);
     });
+    self.proxies = proxies;
 };
 export const linkHandlers = ({ proxies, on, self }) => {
     if (proxies === undefined || on === undefined)
