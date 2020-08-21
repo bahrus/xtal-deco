@@ -78,15 +78,32 @@ Give the proxy a name:
 <button id=myButton></button>
 ```
 
-Then to access the proxy, do:
+You can then set properties through the proxy thusly:
 
 ```html
 <xtal-deco ish="myDecorator"></xtal-deco>
 <button id=myButton></button>
 <script>
-ish.get(myButton, 'myDecorator').then(proxy => {
-    //do something to the proxy
-})
+const sym = Symbol.for('myDecorator');
+if(myButton[sym] === undefined) myButton[sym] = {};
+myButton[sym].myProp = 'hello';
+</script>
+```
+
+If you need to call a method on a proxy, you will need to wait for the proxy to be attached.  To do this:
+
+
+```html
+<xtal-deco ish="myDecorator"></xtal-deco>
+<button id=myButton></button>
+<script>
+const sym = Symbol.for('myDecorator');
+if(myButton[sym] === undefined || myButton[sym].self === undefined)){
+    myButton.addEventListener('myDecorator-proxy-attached', e =>{
+        const proxy = e.detail.proxy;
+        proxy.doSomething();
+    })
+}
 </script>
 ```
 

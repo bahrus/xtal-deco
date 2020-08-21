@@ -29,7 +29,7 @@ export const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: Xtal
 
 
 
-export const linkProxies = ({targets, actions, self}: XtalDeco) => {
+export const linkProxies = ({targets, actions, self, ish}: XtalDeco) => {
     if(targets === undefined || actions === undefined) return;
     const proxies: Element[] = [];
     targets.forEach(proxyTarget =>{
@@ -57,6 +57,19 @@ export const linkProxies = ({targets, actions, self}: XtalDeco) => {
             }
         });
         proxies.push(proxy);
+        if(ish !== undefined){
+            const sym = Symbol.for(ish);
+            const preElevatedProps = (<any>proxyTarget)[sym];
+            if(preElevatedProps !== undefined){
+                Object.assign(proxy, preElevatedProps);
+            }
+            (<any>proxyTarget)[sym] = proxy;
+            proxyTarget.dispatchEvent(new CustomEvent(ish + '-proxy-attached', {
+                detail: {
+                    proxy: proxy,
+                }
+            }));
+        }
     });
     self.proxies = proxies;
 }
@@ -116,11 +129,11 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
 
     static is = 'xtal-deco';
 
-    static attributeProps = ({disabled,  whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on}: XtalDeco
+    static attributeProps = ({disabled,  whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, ish}: XtalDeco
    ) => ({
        bool: [disabled],
        obj: [nextSiblingTarget, targets, init, actions, proxies, on],
-       str: [whereTargetSelector],
+       str: [whereTargetSelector, ish],
    } as AttributeProps);
 
 
@@ -145,6 +158,8 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
     init: PropAction<TTargetElement> | undefined;
 
     on: EventSettings | undefined;
+
+    ish: string | undefined;
 
     connectedCallback() {
         this.style.display = 'none';

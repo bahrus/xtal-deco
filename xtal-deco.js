@@ -26,7 +26,7 @@ export const linkTargets = ({ nextSiblingTarget, whereTargetSelector, self }) =>
         self.targets = [nextSiblingTarget];
     }
 };
-export const linkProxies = ({ targets, actions, self }) => {
+export const linkProxies = ({ targets, actions, self, ish }) => {
     if (targets === undefined || actions === undefined)
         return;
     const proxies = [];
@@ -56,6 +56,19 @@ export const linkProxies = ({ targets, actions, self }) => {
             }
         });
         proxies.push(proxy);
+        if (ish !== undefined) {
+            const sym = Symbol.for(ish);
+            const preElevatedProps = proxyTarget[sym];
+            if (preElevatedProps !== undefined) {
+                Object.assign(proxy, preElevatedProps);
+            }
+            proxyTarget[sym] = proxy;
+            proxyTarget.dispatchEvent(new CustomEvent(ish + '-proxy-attached', {
+                detail: {
+                    proxy: proxy,
+                }
+            }));
+        }
     });
     self.proxies = proxies;
 };
@@ -131,9 +144,9 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     }
 }
 XtalDeco.is = 'xtal-deco';
-XtalDeco.attributeProps = ({ disabled, whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on }) => ({
+XtalDeco.attributeProps = ({ disabled, whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, ish }) => ({
     bool: [disabled],
     obj: [nextSiblingTarget, targets, init, actions, proxies, on],
-    str: [whereTargetSelector],
+    str: [whereTargetSelector, ish],
 });
 define(XtalDeco);
