@@ -29,7 +29,7 @@ export const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: Xtal
 
 
 
-export const linkProxies = ({targets, actions, self, ish}: XtalDeco) => {
+export const linkProxies = ({targets, actions, self, proxyId}: XtalDeco) => {
     if(targets === undefined || actions === undefined) return;
     const proxies: Element[] = [];
     targets.forEach(proxyTarget =>{
@@ -57,14 +57,14 @@ export const linkProxies = ({targets, actions, self, ish}: XtalDeco) => {
             }
         });
         proxies.push(proxy);
-        if(ish !== undefined){
-            const sym = Symbol.for(ish);
+        if(proxyId !== undefined){
+            const sym = Symbol.for(proxyId);
             const preElevatedProps = (<any>proxyTarget)[sym];
             if(preElevatedProps !== undefined){
                 Object.assign(proxy, preElevatedProps);
             }
             (<any>proxyTarget)[sym] = proxy;
-            proxyTarget.dispatchEvent(new CustomEvent(ish + '-proxy-attached', {
+            proxyTarget.dispatchEvent(new CustomEvent(proxyId + '-proxy-attached', {
                 detail: {
                     proxy: proxy,
                 }
@@ -129,11 +129,11 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
 
     static is = 'xtal-deco';
 
-    static attributeProps = ({disabled,  whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, ish}: XtalDeco
+    static attributeProps = ({disabled,  whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId}: XtalDeco
    ) => ({
        bool: [disabled],
        obj: [nextSiblingTarget, targets, init, actions, proxies, on],
-       str: [whereTargetSelector, ish],
+       str: [whereTargetSelector, proxyId],
    } as AttributeProps);
 
 
@@ -159,7 +159,7 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
 
     on: EventSettings | undefined;
 
-    ish: string | undefined;
+    proxyId: string | undefined;
 
     connectedCallback() {
         this.style.display = 'none';

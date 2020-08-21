@@ -82,7 +82,7 @@ Give the proxy a name:
 You can then set properties through the proxy thusly:
 
 ```html
-<xtal-deco ish="myDecorator"></xtal-deco>
+<xtal-deco proxy-id="myDecorator"></xtal-deco>
 <button id=myButton></button>
 <script>
 const sym = Symbol.for('myDecorator');
@@ -97,7 +97,7 @@ If you need to call a [method on a proxy,](https://2ality.com/2015/10/intercepti
 
 
 ```html
-<xtal-deco ish="myDecorator"></xtal-deco>
+<xtal-deco proxy-id="myDecorator"></xtal-deco>
 <button id=myButton></button>
 <script>
 const sym = Symbol.for('myDecorator');
