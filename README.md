@@ -65,7 +65,7 @@ Syntax example:
 
 ```
 
-## Ish [TODO]
+## Ish
 
 Direct access to the target element (button in the example above) bypasses the proxy.
 
@@ -77,6 +77,7 @@ Give the proxy a name:
 <xtal-deco ish="myDecorator"></xtal-deco>
 <button id=myButton></button>
 ```
+
 
 You can then set properties through the proxy thusly:
 
@@ -90,7 +91,9 @@ myButton[sym].myProp = 'hello';
 </script>
 ```
 
-If you need to call a method on a proxy, you will need to wait for the proxy to be attached.  To do this:
+
+
+If you need to call a [method on a proxy,](https://2ality.com/2015/10/intercepting-method-calls.html) you will need to wait for the proxy to be attached.  To do this:
 
 
 ```html
