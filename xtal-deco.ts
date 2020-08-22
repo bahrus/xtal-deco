@@ -1,5 +1,3 @@
-// import { decorate } from 'trans-render/plugins/decorate.js';
-// import { DecorateArgs } from "trans-render/types.d.js";
 import { XtallatX, define, AttributeProps, PropAction, deconstruct, EventSettings} from 'xtal-element/xtal-latx.js';
 import { hydrate } from 'trans-render/hydrate.js';
 
