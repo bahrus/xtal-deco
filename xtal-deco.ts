@@ -20,8 +20,9 @@ export const linkNextSiblingTarget = ({self}: XtalDeco) => {
 export const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: XtalDeco<HTMLElement>) => {
     if(nextSiblingTarget === null) return;
     if(whereTargetSelector){
-        //self.getTargets(whereTargetSelector, nextSiblingTarget);
-        self.targets = Array.from(nextSiblingTarget.querySelectorAll(whereTargetSelector));
+        const targets = Array.from(nextSiblingTarget.querySelectorAll(whereTargetSelector));
+        if(nextSiblingTarget.matches(whereTargetSelector)) targets.unshift(nextSiblingTarget);
+        self.targets = targets;
     }else{
         self.targets = [nextSiblingTarget];
     }
@@ -164,7 +165,7 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
     connectedCallback() {
         this.style.display = 'none';
         super.connectedCallback();
-        linkNextSiblingTarget(this);
+        linkNextSiblingTarget(this as any as XtalDeco);
     }
 
     handlers: eventHandlers | undefined;

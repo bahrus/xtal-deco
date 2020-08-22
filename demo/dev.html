@@ -10,7 +10,7 @@
 
 <body>
     <div>
-        <xtal-deco><script nomodule type="module ish">
+        <xtal-deco><script nomodule=ish>
             const decoProps = {
                 actions: [
                     ({count, self}) => {
@@ -27,8 +27,7 @@
                     self.count = 0;
                 }
             }
-            const decoEl = window["module ish"].parentElement;
-            Object.assign(decoEl, decoProps);
+            Object.assign(selfish.parentElement, decoProps);
 
         </script></xtal-deco>
         <button disabled data-drink-selection="Butterbeer">Click me to Order Your Drink</button>

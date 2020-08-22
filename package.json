@@ -23,7 +23,7 @@
     "xtal-test": "0.0.46",
     "p-et-alia": "0.0.112",
     "es-module-shims": "0.5.2",
-    "nomodule": "0.0.3"
+    "nomodule": "0.0.5"
   },
   "author": "anderson.bruce.b@gmail.com",
   "license": "MIT",

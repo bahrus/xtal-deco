@@ -16,7 +16,7 @@ xtal-deco attaches an [ES6 proxy](https://developer.mozilla.org/en-US/docs/Web/J
 
 xtal-deco has a property, "actions" that allows for a "reactive" way of responding to property changes.
 
-proxyPropActions is an array of arrow functions, where the target element is passed in.  It is expected that the arrow function will use destructuring:
+actions is an array of arrow functions, where the target element is passed in.  It is expected that the arrow function will use destructuring:
 
 ``` JavaScript
 actions: [
@@ -38,7 +38,7 @@ Syntax example:
 
 
 ```html
-<xtal-deco><script nomodule type="module ish">
+<xtal-deco><script nomodule=ish>
     const decoProps = {
         actions: [
             ({count, self}) => {
@@ -47,7 +47,7 @@ Syntax example:
             }
         ],
         on: {
-            'click': ({self}) => {
+            click: ({self}) => {
                 self.count++;
             }
         },
@@ -55,9 +55,7 @@ Syntax example:
             self.count = 0;
         }
     }
-    const decoEl = window["module ish"].parentElement;
-    Object.assign(decoEl, decoProps);
-
+    Object.assign(selfish.parentElement, decoProps);
 </script></xtal-deco>
 <button disabled data-drink-selection="Butterbeer">Click me to Order Your Drink</button>
 <p-d on="count-changed" prop=textContent val=target.count></p-d>
@@ -65,7 +63,7 @@ Syntax example:
 
 ```
 
-## Ish
+## proxy-id
 
 Direct access to the target element (button in the example above) bypasses the proxy.
 
@@ -74,7 +72,7 @@ To allow access to the proxy from the target element:
 Give the proxy a name:
 
 ```html
-<xtal-deco ish="myDecorator"></xtal-deco>
+<xtal-deco proxy-id="myDecorator"></xtal-deco>
 <button id=myButton></button>
 ```
 
@@ -90,7 +88,6 @@ if(myButton[sym] === undefined) myButton[sym] = {};
 myButton[sym].myProp = 'hello';
 </script>
 ```
-
 
 
 If you need to call a [method on a proxy,](https://2ality.com/2015/10/intercepting-method-calls.html) you will need to wait for the proxy to be attached.  To do this:
@@ -109,6 +106,10 @@ if(myButton[sym] === undefined || myButton[sym].self === undefined)){
 }
 </script>
 ```
+
+## Recursive Tree Structures
+
+For recursive tree structures, like
 
 ## Running locally
 

@@ -19,8 +19,10 @@ export const linkTargets = ({ nextSiblingTarget, whereTargetSelector, self }) =>
     if (nextSiblingTarget === null)
         return;
     if (whereTargetSelector) {
-        //self.getTargets(whereTargetSelector, nextSiblingTarget);
-        self.targets = Array.from(nextSiblingTarget.querySelectorAll(whereTargetSelector));
+        const targets = Array.from(nextSiblingTarget.querySelectorAll(whereTargetSelector));
+        if (nextSiblingTarget.matches(whereTargetSelector))
+            targets.unshift(nextSiblingTarget);
+        self.targets = targets;
     }
     else {
         self.targets = [nextSiblingTarget];
