@@ -41,6 +41,7 @@ export const linkProxies = ({targets, actions, self, proxyId}: XtalDeco) => {
                     if(dependencies.includes(key as string)){ //TODO:  symbols
                         const prevSelf = target.self;
                         target.self = target;
+                        
                         action(target as HTMLElement);
                         target.self = prevSelf;
                     }

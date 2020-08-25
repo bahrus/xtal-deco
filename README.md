@@ -63,6 +63,12 @@ Syntax example:
 
 ```
 
+**NB I:**  Here we are, via a proxy, passing ina  field value onto an existing native DOM element -- button in this case.  
+
+I can't completely rule out the possibility that something could go horribly wrong should a property with the same name -- "count" in this case -- be introduced into the browser native button element.  Please act responsibly and only choose field) -- for example "_numberOfDrinksSold" -- whose chance of getting added natively to the button DOM element are lower than seeing a Libertarian POTUS in your pet mouse's lifespan.  These web components have a protective curse -- anyone trying to add a property or a method which has a higher probability will result in the developer receiving a one-way ticket to Azkaban.
+
+You can also leverage ES6 Symbol field keys to ensure the dementors will be kept at bay.
+
 ## proxy-id
 
 Direct access to the target element (button in the example above) bypasses the proxy.
