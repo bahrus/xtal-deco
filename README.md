@@ -4,7 +4,7 @@
 
 <img src="https://badgen.net/bundlephobia/minzip/xtal-deco">
 
-Add properties / methods to other DOM (custom) elements.
+Proxy neighboring DOM (custom) element.
 
 ## Adding behavior to the next element instance with xtal-deco
 
@@ -28,10 +28,10 @@ actions: [
 
 ## Setting proxyActions
 
-There are two straightforward ways of setting proxy actions, depending on your needs:
+There are two straightforward ways of setting the actions (and other object properties), depending on your needs:
 
-1.  Extend class XtalDeco, and implement proxyActions, via the constructor or via [instanceFields](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Public_class_fields).
-2.  Inline proxy actions in the HTML markup.  Use something like [nomodule](https://github.com/bahrus/nomodule).
+1.  Extend class XtalDeco, and implement action, via the constructor or via [instanceFields](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Public_class_fields).
+2.  Inline actions in the HTML markup.  Use something like [nomodule](https://github.com/bahrus/nomodule).
 
 
 Syntax example:
@@ -63,15 +63,15 @@ Syntax example:
 
 ```
 
-**NB I:**  Here we are, via a proxy, passing ina  field value onto an existing native DOM element -- button in this case.  
+**NB I:**  Here we are, via a proxy, setting a field value on an existing native DOM element -- button in this case.  
 
-I can't completely rule out the possibility that something could go horribly wrong should a property with the same name -- "count" in this case -- be introduced into the browser native button element.  Please act responsibly and only choose field) -- for example "_numberOfDrinksSold" -- whose chance of getting added natively to the button DOM element are lower than seeing a Libertarian POTUS in your pet mouse's lifespan.  These web components have a protective curse -- anyone trying to add a property or a method which has a higher probability will result in the developer receiving a one-way ticket to Azkaban.
+I can't completely rule out the possibility that something could go horribly wrong should a property with the same name -- "count" in this case -- be introduced into the browser native button element.  Please act responsibly and only choose field names -- for example "_numberOfDrinksSold" -- whose chance of getting added natively to the button DOM element is lower than seeing a Libertarian POTUS in your pet mouse's lifespan.  These web components have a protective curse -- anyone trying to add a property or a method which has a higher probability will result in the developer receiving a one-way ticket to Azkaban.
 
 You can also leverage ES6 Symbol field keys to ensure the dementors will be kept at bay.
 
 ## proxy-id
 
-Direct access to the target element (button in the example above) bypasses the proxy.
+Direct access to the target element (button in the example above) bypasses the proxy logic.
 
 To allow access to the proxy from the target element:
 
@@ -83,7 +83,7 @@ Give the proxy a name:
 ```
 
 
-You can then set properties through the proxy thusly:
+You can now set properties through the proxy thusly:
 
 ```html
 <xtal-deco proxy-id="myDecorator"></xtal-deco>
@@ -115,7 +115,7 @@ if(myButton[sym] === undefined || myButton[sym].self === undefined)){
 
 ## Recursive Tree Structures
 
-For recursive tree structures, like
+For recursive tree structures, you can, in addition to the next sibling, target children of the target element via the whereTargetSelector/where-target-selector property / attribute.
 
 ## Running locally
 
