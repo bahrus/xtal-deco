@@ -28,35 +28,46 @@ export const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: Xtal
 
 
 
-export const linkProxies = ({targets, actions, self, proxyId}: XtalDeco) => {
+export const linkProxies = ({targets, actions, self, proxyId, virtualProps}: XtalDeco) => {
     if(targets === undefined || actions === undefined) return;
     const proxies: Element[] = [];
+    const virtualPropHolders = new WeakMap();
     targets.forEach(proxyTarget =>{
+        
         const proxy = new Proxy(proxyTarget, {
             set: (target: any, key, value) => {
-
-                target[key] = value;
+                const virtualPropHolder = virtualPropHolders.get(target);
+                if(key === 'self' || (virtualProps !== undefined && virtualProps.includes(key as string))){
+                    virtualPropHolder[key] = value;
+                }else{
+                    target[key] = value;
+                }
                 if(key === 'self') return true;
                 actions.forEach(action =>{
                     const dependencies = deconstruct(action);
-                    if(dependencies.includes(key as string)){ //TODO:  symbols
-                        const prevSelf = target.self;
-                        target.self = target;
-                        
-                        action(target as HTMLElement);
-                        target.self = prevSelf;
+                    if(dependencies.includes(key as string)){
+                        //TODO:  symbols
+                        const arg = Object.assign({}, virtualPropHolder, target);
+                        action(arg as HTMLElement);
                     }
                 });
                 return true;
             },
-            get:(obj,key)=>{
-                let value = Reflect.get(obj,key);
+            get:(target, key)=>{
+                let value;// = Reflect.get(target, key);
+                if(key === 'self' || (virtualProps !== undefined && virtualProps.includes(key as string))){
+                    const virtualPropHolder = virtualPropHolders.get(target);
+                    value = virtualPropHolder[key];
+                }else{
+                    value = target[key];// = value;
+                }
                 if(typeof(value) == "function"){
-                    return value.bind(obj);
+                    return value.bind(target);
                 }
                 return value;
             }
         });
+        virtualPropHolders.set(proxyTarget, {});
         proxies.push(proxy);
         if(proxyId !== undefined){
             const sym = Symbol.for(proxyId);
@@ -108,14 +119,15 @@ export const linkHandlers = ({proxies, on, self}: XtalDeco) => {
     self.handlers = handlers;
 }
 
-export const doInit = ({proxies, init}: XtalDeco) => {
+export const doInit = ({proxies, init, self}: XtalDeco) => {
     if(proxies === undefined || init === undefined) return;
     proxies.forEach((target: any) => {
-        const prevSelf = target.self;
+        //const prevSelf = target.self;
         target.self = target;
         init(target as HTMLElement);
-        target.self = prevSelf;
+        //target.self = prevSelf;
     }); 
+    //delete self.proxies?
 }
 
 export const propActions = [linkNextSiblingTarget, linkTargets, linkProxies, linkHandlers, doInit];
@@ -149,7 +161,9 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
 
     nextSiblingTarget: Element | null = null;
 
-
+    /**
+     * temporary holder of target elements to apply proxy to.
+     */
     targets: Element[] | undefined;
 
     proxies: Element[] | undefined;

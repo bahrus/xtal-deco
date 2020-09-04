@@ -26,35 +26,49 @@ export const linkTargets = ({ nextSiblingTarget, whereTargetSelector, self }) =>
         self.targets = [nextSiblingTarget];
     }
 };
-export const linkProxies = ({ targets, actions, self, proxyId }) => {
+export const linkProxies = ({ targets, actions, self, proxyId, virtualProps }) => {
     if (targets === undefined || actions === undefined)
         return;
     const proxies = [];
+    const virtualPropHolders = new WeakMap();
     targets.forEach(proxyTarget => {
         const proxy = new Proxy(proxyTarget, {
             set: (target, key, value) => {
-                target[key] = value;
+                const virtualPropHolder = virtualPropHolders.get(target);
+                if (key === 'self' || (virtualProps !== undefined && virtualProps.includes(key))) {
+                    virtualPropHolder[key] = value;
+                }
+                else {
+                    target[key] = value;
+                }
                 if (key === 'self')
                     return true;
                 actions.forEach(action => {
                     const dependencies = deconstruct(action);
-                    if (dependencies.includes(key)) { //TODO:  symbols
-                        const prevSelf = target.self;
-                        target.self = target;
-                        action(target);
-                        target.self = prevSelf;
+                    if (dependencies.includes(key)) {
+                        //TODO:  symbols
+                        const arg = Object.assign({}, virtualPropHolder, target);
+                        action(arg);
                     }
                 });
                 return true;
             },
-            get: (obj, key) => {
-                let value = Reflect.get(obj, key);
+            get: (target, key) => {
+                let value; // = Reflect.get(target, key);
+                if (key === 'self' || (virtualProps !== undefined && virtualProps.includes(key))) {
+                    const virtualPropHolder = virtualPropHolders.get(target);
+                    value = virtualPropHolder[key];
+                }
+                else {
+                    value = target[key]; // = value;
+                }
                 if (typeof (value) == "function") {
-                    return value.bind(obj);
+                    return value.bind(target);
                 }
                 return value;
             }
         });
+        virtualPropHolders.set(proxyTarget, {});
         proxies.push(proxy);
         if (proxyId !== undefined) {
             const sym = Symbol.for(proxyId);
@@ -71,6 +85,7 @@ export const linkProxies = ({ targets, actions, self, proxyId }) => {
         }
     });
     self.proxies = proxies;
+    delete self.targets; //avoid memory leaks
 };
 export const linkHandlers = ({ proxies, on, self }) => {
     if (proxies === undefined || on === undefined)
@@ -100,15 +115,16 @@ export const linkHandlers = ({ proxies, on, self }) => {
     self.disconnect();
     self.handlers = handlers;
 };
-export const doInit = ({ proxies, init }) => {
+export const doInit = ({ proxies, init, self }) => {
     if (proxies === undefined || init === undefined)
         return;
     proxies.forEach((target) => {
-        const prevSelf = target.self;
+        //const prevSelf = target.self;
         target.self = target;
         init(target);
-        target.self = prevSelf;
+        //target.self = prevSelf;
     });
+    //delete self.proxies?
 };
 export const propActions = [linkNextSiblingTarget, linkTargets, linkProxies, linkHandlers, doInit];
 /**
@@ -144,9 +160,10 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     }
 }
 XtalDeco.is = 'xtal-deco';
-XtalDeco.attributeProps = ({ disabled, whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId }) => ({
+XtalDeco.attributeProps = ({ disabled, whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId, virtualProps }) => ({
     bool: [disabled],
-    obj: [nextSiblingTarget, targets, init, actions, proxies, on],
+    obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps],
     str: [whereTargetSelector, proxyId],
+    jsonProp: [virtualProps],
 });
 define(XtalDeco);
