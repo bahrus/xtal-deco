@@ -34,6 +34,7 @@ export const linkProxies = ({targets, actions, self, proxyId}: XtalDeco) => {
     targets.forEach(proxyTarget =>{
         const proxy = new Proxy(proxyTarget, {
             set: (target: any, key, value) => {
+
                 target[key] = value;
                 if(key === 'self') return true;
                 actions.forEach(action =>{
@@ -72,6 +73,7 @@ export const linkProxies = ({targets, actions, self, proxyId}: XtalDeco) => {
         }
     });
     self.proxies = proxies;
+    delete self.targets; //avoid memory leaks
 }
 
 
@@ -129,11 +131,12 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
 
     static is = 'xtal-deco';
 
-    static attributeProps = ({disabled,  whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId}: XtalDeco
+    static attributeProps = ({disabled,  whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId, virtualProps}: XtalDeco
    ) => ({
        bool: [disabled],
-       obj: [nextSiblingTarget, targets, init, actions, proxies, on],
+       obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps],
        str: [whereTargetSelector, proxyId],
+       jsonProp: [virtualProps],
    } as AttributeProps);
 
 
@@ -150,6 +153,8 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
     targets: Element[] | undefined;
 
     proxies: Element[] | undefined;
+
+    virtualProps: string[] | undefined;
 
     propActions = propActions as PropAction<any>[];
 

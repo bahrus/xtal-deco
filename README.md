@@ -10,13 +10,13 @@ Proxy neighboring DOM (custom) element.
 
 xtal-deco provides a way of adding behavior to the next sibling element -- "decorating" the element.  
 
-The affected element can be a native DOM element, or a custom element instances. 
+The affected element can be a native DOM element, or a custom element instance. 
 
 xtal-deco attaches an [ES6 proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
 
 xtal-deco has a property, "actions" that allows for a "reactive" way of responding to property changes.
 
-actions is an array of arrow functions, where the target element is passed in.  It is expected that the arrow function will use destructuring:
+actions is an array of arrow functions, where the proxy of the target element is passed in.  It is expected that the arrow function will use destructuring:
 
 ``` JavaScript
 actions: [
@@ -65,9 +65,17 @@ Syntax example:
 
 **NB I:**  Here we are, via a proxy, setting a field value on an existing native DOM element -- button in this case.  
 
-I can't completely rule out the possibility that something could go horribly wrong should a property with the same name -- "count" in this case -- be introduced into the browser native button element.  Please act responsibly and only choose field names -- for example "_numberOfDrinksSold" -- whose chance of getting added natively to the button DOM element is lower than seeing a Libertarian POTUS in your pet mouse's lifespan.  These web components have a protective curse -- anyone trying to add a property or a method which has a higher probability will result in the developer receiving a one-way ticket to Azkaban.
+"Throwing new properties" on another DOM element is [considered problematic](https://youtu.be/uygxJ8Wxotc?t=319).  Consequently,
+this web components has a protective curse -- anyone trying to add a new property or a method onto another element will receive a one-way ticket to Azkaban.
 
-You can also leverage ES6 Symbol field keys to ensure the dementors will be kept at bay.
+However, the ability to add new data elements as part of the enhanced behavior is critical.  We need the ability to add new properties onto our proxy only.
+
+To do this, use property/attribute virtualProps/virtual-props:
+
+```html
+<xtal-deco virtualProps='["count"]'></xtal-deco>
+```
+
 
 ## proxy-id
 
