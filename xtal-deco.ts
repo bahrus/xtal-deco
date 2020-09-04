@@ -28,7 +28,7 @@ export const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: Xtal
 
 
 
-export const linkProxies = ({targets, actions, self, proxyId, virtualProps}: XtalDeco) => {
+export const linkProxies = ({targets, actions, self, proxyId, virtualProps, targetToProxyMap}: XtalDeco) => {
     if(targets === undefined || actions === undefined) return;
     const proxies: Element[] = [];
     const virtualPropHolders = new WeakMap();
@@ -68,6 +68,7 @@ export const linkProxies = ({targets, actions, self, proxyId, virtualProps}: Xta
             }
         });
         virtualPropHolders.set(proxyTarget, {});
+        targetToProxyMap.set(proxyTarget, proxy);
         proxies.push(proxy);
         if(proxyId !== undefined){
             const sym = Symbol.for(proxyId);
@@ -141,12 +142,12 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
 
     static is = 'xtal-deco';
 
-    static attributeProps = ({disabled,  whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId, virtualProps}: XtalDeco
+    static attributeProps = ({whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId, virtualProps, targetToProxyMap}: XtalDeco
    ) => ({
-       bool: [disabled],
-       obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps],
+       obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap],
        str: [whereTargetSelector, proxyId],
        jsonProp: [virtualProps],
+       notify: [targetToProxyMap]
    } as AttributeProps);
 
 
@@ -183,6 +184,8 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
     on: EventSettings | undefined;
 
     proxyId: string | undefined;
+
+    targetToProxyMap: WeakMap<any, any> = new WeakMap();
 
     connectedCallback() {
         this.style.display = 'none';

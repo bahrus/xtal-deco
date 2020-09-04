@@ -76,12 +76,13 @@ To do this, use property/attribute virtualProps/virtual-props:
 <xtal-deco virtualProps='["count"]'></xtal-deco>
 ```
 
+Doing so causes the property count to be stored and retrieved via a [WeakMap](https://stackoverflow.com/a/49879350/3320028).
 
-## proxy-id
+## proxy-id [Controversial, but relatively easy]
 
 Direct access to the target element (button in the example above) bypasses the proxy logic.
 
-To allow access to the proxy from the target element:
+To get access to the proxy from the target element:
 
 Give the proxy a name:
 
@@ -94,7 +95,7 @@ Give the proxy a name:
 You can now set properties through the proxy thusly:
 
 ```html
-<xtal-deco proxy-id="myDecorator"></xtal-deco>
+<xtal-deco proxy-id="myDecorator" virtualProps='["myProp"]'></xtal-deco>
 <button id=myButton></button>
 <script>
 const sym = Symbol.for('myDecorator');
@@ -120,6 +121,12 @@ if(myButton[sym] === undefined || myButton[sym].self === undefined)){
 }
 </script>
 ```
+
+**NB:**  This approach is a bit controversial.  Although we are attaching a symbol instead of a plain string property on a native DOM element, 
+the fact that we are using Symbol.for means that clashes could arise between different decorators (within the same ShadowDOM) that happen to use the same string
+inside the Symbol.for expression.  In addition, somehow this could cause the JavaScript runtime to [de-optimize](https://youtu.be/uygxJ8Wxotc?t=350). 
+
+An alternative, more complex but safe approach is to use the targetToProxyMap property of the xtal-deco element.  However, a mechanism for passing in values befor JS libraries have loaded is a bit murky with this approach.
 
 ## Recursive Tree Structures
 

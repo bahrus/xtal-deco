@@ -26,7 +26,7 @@ export const linkTargets = ({ nextSiblingTarget, whereTargetSelector, self }) =>
         self.targets = [nextSiblingTarget];
     }
 };
-export const linkProxies = ({ targets, actions, self, proxyId, virtualProps }) => {
+export const linkProxies = ({ targets, actions, self, proxyId, virtualProps, targetToProxyMap }) => {
     if (targets === undefined || actions === undefined)
         return;
     const proxies = [];
@@ -69,6 +69,7 @@ export const linkProxies = ({ targets, actions, self, proxyId, virtualProps }) =
             }
         });
         virtualPropHolders.set(proxyTarget, {});
+        targetToProxyMap.set(proxyTarget, proxy);
         proxies.push(proxy);
         if (proxyId !== undefined) {
             const sym = Symbol.for(proxyId);
@@ -135,6 +136,7 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
         super(...arguments);
         this.nextSiblingTarget = null;
         this.propActions = propActions;
+        this.targetToProxyMap = new WeakMap();
     }
     connectedCallback() {
         this.style.display = 'none';
@@ -158,10 +160,10 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     }
 }
 XtalDeco.is = 'xtal-deco';
-XtalDeco.attributeProps = ({ disabled, whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId, virtualProps }) => ({
-    bool: [disabled],
-    obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps],
+XtalDeco.attributeProps = ({ whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId, virtualProps, targetToProxyMap }) => ({
+    obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap],
     str: [whereTargetSelector, proxyId],
     jsonProp: [virtualProps],
+    notify: [targetToProxyMap]
 });
 define(XtalDeco);
