@@ -119,12 +119,10 @@ export const doInit = ({ proxies, init, self }) => {
     if (proxies === undefined || init === undefined)
         return;
     proxies.forEach((target) => {
-        //const prevSelf = target.self;
         target.self = target;
         init(target);
-        //target.self = prevSelf;
     });
-    //delete self.proxies?
+    delete self.proxies;
 };
 export const propActions = [linkNextSiblingTarget, linkTargets, linkProxies, linkHandlers, doInit];
 /**

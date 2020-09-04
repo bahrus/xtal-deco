@@ -15,7 +15,11 @@
                 actions: [
                     ({count, self}) => {
                         window.alert(count + " butterbeers sold");
-                        self.dispatchEvent(new Event('count-changed'));
+                        self.dispatchEvent(new CustomEvent('count-changed', {
+                            detail:{
+                                value: count
+                            }
+                        }));
                     }
                 ],
                 on: {
@@ -31,7 +35,7 @@
 
         </script></xtal-deco>
         <button disabled data-drink-selection="Butterbeer">Click me to Order Your Drink</button>
-        <p-d on="count-changed" prop=textContent val=target.count></p-d>
+        <p-d on="count-changed" prop=textContent val=detail.value></p-d>
         <span></span> drinks sold.
         
         <script defer src="https://cdn.jsdelivr.net/npm/es-module-shims@0.2.7/dist/es-module-shims.js"></script>

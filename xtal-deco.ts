@@ -122,12 +122,10 @@ export const linkHandlers = ({proxies, on, self}: XtalDeco) => {
 export const doInit = ({proxies, init, self}: XtalDeco) => {
     if(proxies === undefined || init === undefined) return;
     proxies.forEach((target: any) => {
-        //const prevSelf = target.self;
         target.self = target;
         init(target as HTMLElement);
-        //target.self = prevSelf;
     }); 
-    //delete self.proxies?
+    delete self.proxies;
 }
 
 export const propActions = [linkNextSiblingTarget, linkTargets, linkProxies, linkHandlers, doInit];
@@ -166,8 +164,14 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
      */
     targets: Element[] | undefined;
 
+    /**
+     * temporary holder of proxies that need initalizing.
+     */
     proxies: Element[] | undefined;
 
+    /**
+     * Set these properties via a weakmap, rather than on the (native) element itself.
+     */
     virtualProps: string[] | undefined;
 
     propActions = propActions as PropAction<any>[];
