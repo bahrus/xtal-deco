@@ -99,7 +99,6 @@ export const linkProxies = ({ targets, actions, self, virtualProps, targetToProx
                 return value;
             }
         });
-        proxy.self = proxy;
         virtualPropHolders.set(proxyTarget, {});
         targetToProxyMap.set(proxyTarget, proxy);
         proxies.push(proxy);
