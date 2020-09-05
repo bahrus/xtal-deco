@@ -1,10 +1,41 @@
 import { XtallatX, define, deconstruct } from 'xtal-element/xtal-latx.js';
 import { hydrate } from 'trans-render/hydrate.js';
-export const linkNextSiblingTarget = ({ self }) => {
-    let nextEl = self;
-    while (nextEl && (nextEl.localName.indexOf('-deco') > -1)) {
-        nextEl = nextEl.nextElementSibling;
+//https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
+function getNextSibling(elem, selector) {
+    // Get the next sibling element
+    var sibling = elem.nextElementSibling;
+    if (selector === undefined)
+        return sibling;
+    // If the sibling matches our selector, use it
+    // If not, jump to the next sibling and continue the loop
+    while (sibling) {
+        if (sibling.matches(selector))
+            return sibling;
+        sibling = sibling.nextElementSibling;
     }
+    return sibling;
+}
+;
+// https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Mutation_events#Mutation_Observers_alternatives_examples
+//can't we use https://developer.mozilla.org/en-US/docs/Web/API/Node/contains#:~:text=The%20Node.,direct%20children%2C%20and%20so%20on.?
+function onRemove(element, callback) {
+    let observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            mutation.removedNodes.forEach(removed => {
+                if (element === removed) {
+                    callback();
+                    observer.disconnect();
+                }
+            });
+        });
+    });
+    observer.observe(element.parentElement || element.getRootNode(), {
+        childList: true,
+    });
+}
+;
+export const linkNextSiblingTarget = ({ self, matchClosest }) => {
+    const nextEl = getNextSibling(self, matchClosest);
     if (!nextEl) {
         setTimeout(() => {
             linkNextSiblingTarget(self);
@@ -85,6 +116,8 @@ export const linkProxies = ({ targets, actions, self, proxyId, virtualProps, tar
             }));
         }
     });
+    self.mainProxy = proxies[0];
+    self.mainTarget = targets[0];
     self.proxies = proxies;
     delete self.targets; //avoid memory leaks
 };
@@ -123,9 +156,21 @@ export const doInit = ({ proxies, init, self }) => {
         target.self = target;
         init(target);
     });
-    delete self.proxies;
+    delete self.proxies; //avoid memory leaks
 };
-export const propActions = [linkNextSiblingTarget, linkTargets, linkProxies, linkHandlers, doInit];
+export const watchForTargetRelease = ({ self, mainTarget }) => {
+    if (mainTarget === undefined)
+        return;
+    onRemove(mainTarget, () => {
+        delete self.mainTarget;
+    });
+};
+export const releaseProxy = ({ self, mainTarget }) => {
+    if (mainTarget === undefined) {
+        delete self.mainProxy;
+    }
+};
+export const propActions = [linkNextSiblingTarget, linkTargets, linkProxies, linkHandlers, doInit, watchForTargetRelease, releaseProxy];
 /**
  * Attach / override behavior onto the next element
  * @element xtal-deco
@@ -160,10 +205,11 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     }
 }
 XtalDeco.is = 'xtal-deco';
-XtalDeco.attributeProps = ({ whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId, virtualProps, targetToProxyMap }) => ({
-    obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap],
-    str: [whereTargetSelector, proxyId],
+XtalDeco.attributeProps = ({ whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId, virtualProps, targetToProxyMap, matchClosest, mainProxy }) => ({
+    obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap, mainProxy],
+    str: [whereTargetSelector, proxyId, matchClosest],
     jsonProp: [virtualProps],
-    notify: [targetToProxyMap]
+    notify: [targetToProxyMap],
+    reflect: [matchClosest, whereTargetSelector]
 });
 define(XtalDeco);

@@ -8,13 +8,13 @@ Proxy neighboring DOM (custom) element.
 
 ## Adding behavior to the next element instance with xtal-deco
 
-xtal-deco provides a way of adding behavior to the next sibling element -- "decorating" the element.  
+xtal-deco provides a base class for adding behavior to the next sibling element -- "decorating" the element.  
 
 The affected element can be a native DOM element, or a custom element instance. 
 
-xtal-deco attaches an [ES6 proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+xtal-deco attaches an [ES6 proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) onto the next sibling element
 
-xtal-deco has a property, "actions" that allows for a "reactive" way of responding to property changes.
+xtal-deco has a property, "actions" that allows for a "reactive" way of responding to property changes passed through via the proxy.
 
 actions is an array of arrow functions, where the proxy of the target element is passed in.  It is expected that the arrow function will use destructuring:
 
@@ -66,9 +66,9 @@ Syntax example:
 **NB I:**  Here we are, via a proxy, setting a field value on an existing native DOM element -- button in this case.  
 
 "Throwing new properties" on another DOM element is [considered problematic](https://youtu.be/uygxJ8Wxotc?t=319).  Consequently,
-this web components has a protective curse -- anyone trying to add a new property or a method onto another element will receive a one-way ticket to Azkaban.
+this web component has a protective curse -- anyone trying to add a new property or a method onto another element will receive a one-way ticket to Azkaban.
 
-However, the ability to add new data elements as part of the enhanced behavior is critical.  We need the ability to add new properties onto our proxy only.
+However, the ability to add new data elements is critical when enhancing behavior.  We need the ability to add new properties onto our proxy only.
 
 To do this, use property/attribute virtualProps/virtual-props:
 
@@ -76,61 +76,24 @@ To do this, use property/attribute virtualProps/virtual-props:
 <xtal-deco virtualProps='["count"]'></xtal-deco>
 ```
 
-Doing so causes the property count to be stored and retrieved via a [WeakMap](https://stackoverflow.com/a/49879350/3320028).
+Doing so causes the property "count" to be stored and retrieved via a [WeakMap](https://stackoverflow.com/a/49879350/3320028).
 
-## proxy-id [Controversial, but relatively easy]
-
-Direct access to the target element (button in the example above) bypasses the proxy logic.
-
-To get access to the proxy from the target element:
-
-Give the proxy a name:
-
-```html
-<xtal-deco proxy-id="myDecorator"></xtal-deco>
-<button id=myButton></button>
-```
-
-
-You can now set properties through the proxy thusly:
-
-```html
-<xtal-deco proxy-id="myDecorator" virtualProps='["myProp"]'></xtal-deco>
-<button id=myButton></button>
-<script>
-const sym = Symbol.for('myDecorator');
-if(myButton[sym] === undefined) myButton[sym] = {};
-myButton[sym].myProp = 'hello';
-</script>
-```
-
-
-If you need to call a [method on a proxy,](https://2ality.com/2015/10/intercepting-method-calls.html) you will need to wait for the proxy to be attached.  To do this:
-
-
-```html
-<xtal-deco proxy-id="myDecorator"></xtal-deco>
-<button id=myButton></button>
-<script>
-const sym = Symbol.for('myDecorator');
-if(myButton[sym] === undefined || myButton[sym].self === undefined)){
-    myButton.addEventListener('myDecorator-proxy-attached', e =>{
-        const proxy = e.detail.proxy;
-        proxy.doSomething();
-    })
-}
-</script>
-```
-
-**NB:**  This approach is a bit controversial.  Although we are attaching a symbol instead of a plain string property on a native DOM element, 
-the fact that we are using Symbol.for means that clashes could arise between different decorators (within the same ShadowDOM) that happen to use the same string
-inside the Symbol.for expression.  In addition, somehow this could cause the JavaScript runtime to [de-optimize](https://youtu.be/uygxJ8Wxotc?t=350). 
-
-An alternative, more complex but safe approach is to use the targetToProxyMap property of the xtal-deco element.  However, a mechanism for passing in values befor JS libraries have loaded is a bit murky with this approach.
 
 ## Recursive Tree Structures
 
 For recursive tree structures, you can, in addition to the next sibling, target children of the target element via the whereTargetSelector/where-target-selector property / attribute.
+
+## Closest match
+
+If multiple decorators are needed on the same element, then at least one of the decorators will need to skip over the other decorators.  You can specify what element to target from the set of nextElementSiblings via the matchClosest / match-closest property/attribute.
+
+##  Externally apply properties to the target element via the proxy.
+
+xtal-deco creates a WeakMap property, targetToProxyMap, which allows you to pass in the target DOM element, and get the proxy.
+
+However, this is rather clumsy in practice.
+
+Another way to handle this is to define properties that need passing from external sources on the element extending xtal-deco.  The property setter would need to be forward the value on to the proxy / proxies via the proxies property of the base class.
 
 ## Running locally
 
