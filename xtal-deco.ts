@@ -59,7 +59,7 @@ export const linkTargets = ({nextSiblingTarget, whereTargetSelector, self}: Xtal
 
 
 
-export const linkProxies = ({targets, actions, self, proxyId, virtualProps, targetToProxyMap}: XtalDeco) => {
+export const linkProxies = ({targets, actions, self, virtualProps, targetToProxyMap}: XtalDeco) => {
     if(targets === undefined || actions === undefined) return;
     const proxies: Element[] = [];
     const virtualPropHolders = new WeakMap();
@@ -101,19 +101,7 @@ export const linkProxies = ({targets, actions, self, proxyId, virtualProps, targ
         virtualPropHolders.set(proxyTarget, {});
         targetToProxyMap.set(proxyTarget, proxy);
         proxies.push(proxy);
-        if(proxyId !== undefined){
-            const sym = Symbol.for(proxyId);
-            const preElevatedProps = (<any>proxyTarget)[sym];
-            if(preElevatedProps !== undefined){
-                Object.assign(proxy, preElevatedProps);
-            }
-            (<any>proxyTarget)[sym] = proxy;
-            proxyTarget.dispatchEvent(new CustomEvent(proxyId + '-proxy-attached', {
-                detail: {
-                    proxy: proxy,
-                }
-            }));
-        }
+        
     });
     self.mainProxy = proxies[0];
     self.mainTarget = targets[0];
@@ -190,7 +178,7 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
 
     static attributeProps = ({
         whereTargetSelector, nextSiblingTarget, targets, init, 
-        actions, proxies, on, proxyId, virtualProps, targetToProxyMap, matchClosest,
+        actions, proxies, on, virtualProps, targetToProxyMap, matchClosest,
         mainProxy, mainTarget
     }: XtalDeco) => ({
        obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap, mainProxy, mainTarget],
@@ -244,8 +232,6 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
     on: EventSettings | undefined;
 
     matchClosest: string | undefined;
-
-    proxyId: string | undefined;
 
     targetToProxyMap: WeakMap<any, any> = new WeakMap();
 

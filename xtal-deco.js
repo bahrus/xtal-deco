@@ -57,7 +57,7 @@ export const linkTargets = ({ nextSiblingTarget, whereTargetSelector, self }) =>
         self.targets = [nextSiblingTarget];
     }
 };
-export const linkProxies = ({ targets, actions, self, proxyId, virtualProps, targetToProxyMap }) => {
+export const linkProxies = ({ targets, actions, self, virtualProps, targetToProxyMap }) => {
     if (targets === undefined || actions === undefined)
         return;
     const proxies = [];
@@ -102,19 +102,6 @@ export const linkProxies = ({ targets, actions, self, proxyId, virtualProps, tar
         virtualPropHolders.set(proxyTarget, {});
         targetToProxyMap.set(proxyTarget, proxy);
         proxies.push(proxy);
-        if (proxyId !== undefined) {
-            const sym = Symbol.for(proxyId);
-            const preElevatedProps = proxyTarget[sym];
-            if (preElevatedProps !== undefined) {
-                Object.assign(proxy, preElevatedProps);
-            }
-            proxyTarget[sym] = proxy;
-            proxyTarget.dispatchEvent(new CustomEvent(proxyId + '-proxy-attached', {
-                detail: {
-                    proxy: proxy,
-                }
-            }));
-        }
     });
     self.mainProxy = proxies[0];
     self.mainTarget = targets[0];
@@ -205,7 +192,7 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     }
 }
 XtalDeco.is = 'xtal-deco';
-XtalDeco.attributeProps = ({ whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId, virtualProps, targetToProxyMap, matchClosest, mainProxy, mainTarget }) => ({
+XtalDeco.attributeProps = ({ whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap, matchClosest, mainProxy, mainTarget }) => ({
     obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap, mainProxy, mainTarget],
     str: [whereTargetSelector, proxyId, matchClosest],
     jsonProp: [virtualProps],
