@@ -194,7 +194,7 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
 XtalDeco.is = 'xtal-deco';
 XtalDeco.attributeProps = ({ whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap, matchClosest, mainProxy, mainTarget }) => ({
     obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap, mainProxy, mainTarget],
-    str: [whereTargetSelector, proxyId, matchClosest],
+    str: [whereTargetSelector, matchClosest],
     jsonProp: [virtualProps],
     notify: [targetToProxyMap],
     reflect: [matchClosest, whereTargetSelector]

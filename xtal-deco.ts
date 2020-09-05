@@ -182,7 +182,7 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
         mainProxy, mainTarget
     }: XtalDeco) => ({
        obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap, mainProxy, mainTarget],
-       str: [whereTargetSelector, proxyId, matchClosest],
+       str: [whereTargetSelector, matchClosest],
        jsonProp: [virtualProps],
        notify: [targetToProxyMap],
        reflect: [matchClosest, whereTargetSelector]
