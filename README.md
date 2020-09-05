@@ -93,7 +93,7 @@ xtal-deco creates a WeakMap property, targetToProxyMap, which allows you to pass
 
 However, this is rather clumsy in practice.
 
-Another way to handle this is to define properties that need passing from external sources on the element extending xtal-deco.  The property setter would need to be forward the value on to the proxy / proxies via the proxies property of the base class.
+Another way to handle this is to define properties that need passing from external sources on the custom element that extends xtal-deco.  The property setter would need to forward the value on to the proxy / proxies via the "proxies" property of the base class.
 
 ## Running locally
 
