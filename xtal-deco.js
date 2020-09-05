@@ -162,7 +162,7 @@ export const watchForTargetRelease = ({ self, mainTarget }) => {
     if (mainTarget === undefined)
         return;
     onRemove(mainTarget, () => {
-        delete self.mainTarget;
+        self.mainTarget = undefined;
     });
 };
 export const releaseProxy = ({ self, mainTarget }) => {
@@ -205,8 +205,8 @@ export class XtalDeco extends XtallatX(hydrate(HTMLElement)) {
     }
 }
 XtalDeco.is = 'xtal-deco';
-XtalDeco.attributeProps = ({ whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId, virtualProps, targetToProxyMap, matchClosest, mainProxy }) => ({
-    obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap, mainProxy],
+XtalDeco.attributeProps = ({ whereTargetSelector, nextSiblingTarget, targets, init, actions, proxies, on, proxyId, virtualProps, targetToProxyMap, matchClosest, mainProxy, mainTarget }) => ({
+    obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap, mainProxy, mainTarget],
     str: [whereTargetSelector, proxyId, matchClosest],
     jsonProp: [virtualProps],
     notify: [targetToProxyMap],

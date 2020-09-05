@@ -165,7 +165,7 @@ export const doInit = ({proxies, init, self}: XtalDeco) => {
 export const watchForTargetRelease = ({self, mainTarget}: XtalDeco) => {
     if(mainTarget === undefined) return;
     onRemove(mainTarget, () =>{
-        delete self.mainTarget;
+        self.mainTarget = undefined;
     })
 }
 
@@ -191,9 +191,9 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
     static attributeProps = ({
         whereTargetSelector, nextSiblingTarget, targets, init, 
         actions, proxies, on, proxyId, virtualProps, targetToProxyMap, matchClosest,
-        mainProxy
+        mainProxy, mainTarget
     }: XtalDeco) => ({
-       obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap, mainProxy],
+       obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap, mainProxy, mainTarget],
        str: [whereTargetSelector, proxyId, matchClosest],
        jsonProp: [virtualProps],
        notify: [targetToProxyMap],
