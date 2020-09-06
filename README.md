@@ -8,11 +8,9 @@ Proxy neighboring DOM (custom) element.
 
 ## Adding behavior to the next element instance with xtal-deco
 
-xtal-deco provides a base class for adding behavior to the next sibling element -- "decorating" the element.  
+xtal-deco provides a base class for adding behavior to the next sibling element -- "decorating" the element, via an [ES6 proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy).  
 
 The affected element can be a native DOM element, or a custom element instance. 
-
-xtal-deco attaches an [ES6 proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) onto the next sibling element
 
 xtal-deco has a property, "actions" that allows for a "reactive" way of responding to property changes passed through via the proxy.
 
@@ -30,7 +28,7 @@ actions: [
 
 There are two straightforward ways of setting the actions (and other object properties), depending on your needs:
 
-1.  Extend class XtalDeco, and implement action, via the constructor or via [instanceFields](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Public_class_fields).
+1.  Extend class XtalDeco, and implement actions, via the constructor or via [instanceFields](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Public_class_fields).
 2.  Inline actions in the HTML markup.  Use something like [nomodule](https://github.com/bahrus/nomodule).
 
 
@@ -63,7 +61,7 @@ Syntax example:
 
 ```
 
-**NB I:**  Here we are, via a proxy, setting a field value on an existing native DOM element -- button in this case.  
+**NB I:**  Here, we are, via a proxy, setting a field value on an existing native DOM element -- button in this case.  
 
 "Throwing new properties" on another DOM element is [considered problematic](https://youtu.be/uygxJ8Wxotc?t=319).  Consequently,
 this web component has a protective curse -- anyone trying to add a new property or a method onto another element will receive a one-way ticket to Azkaban.
@@ -73,7 +71,7 @@ However, the ability to add new data elements is critical when enhancing behavio
 To do this, use property/attribute virtualProps/virtual-props:
 
 ```html
-<xtal-deco virtualProps='["count"]'></xtal-deco>
+<xtal-deco virtual-props='["count"]'></xtal-deco>
 ```
 
 Doing so causes the property "count" to be stored and retrieved via a [WeakMap](https://stackoverflow.com/a/49879350/3320028).
