@@ -15,11 +15,6 @@
                 actions: [
                     ({count, self}) => {
                         window.alert(count + " butterbeers sold");
-                        self.dispatchEvent(new CustomEvent('count-changed', {
-                            detail:{
-                                value: count
-                            }
-                        }));
                     }
                 ],
                 on: {

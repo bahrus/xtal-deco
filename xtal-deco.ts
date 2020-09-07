@@ -1,4 +1,4 @@
-import { XtallatX, define, AttributeProps, PropAction, deconstruct, EventSettings} from 'xtal-element/xtal-latx.js';
+import { XtallatX, define, AttributeProps, PropAction, deconstruct, EventSettings, camelToLisp} from 'xtal-element/xtal-latx.js';
 import { hydrate } from 'trans-render/hydrate.js';
 
 //https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
@@ -82,6 +82,15 @@ export const linkProxies = ({targets, actions, self, virtualProps, targetToProxy
                         action(arg as HTMLElement);
                     }
                 });
+                switch(typeof key){
+                    case 'string':
+                        target.dispatchEvent(new CustomEvent(camelToLisp(key) + '-changed', {
+                            detail:{
+                                value: value
+                            }
+                        }));
+                        break;
+                }
                 return true;
             },
             get:(target, key)=>{
