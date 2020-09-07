@@ -41,7 +41,6 @@ Syntax example:
         actions: [
             ({count, self}) => {
                 window.alert(count + " butterbeers sold");
-                self.dispatchEvent(new Event('count-changed'));
             }
         ],
         on: {
