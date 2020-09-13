@@ -14,13 +14,13 @@
     "url": "git+https://github.com/bahrus/xtal-deco.git"
   },
   "dependencies": {
-    "trans-render": "0.0.255",
-    "xtal-element": "0.0.295",
+    "trans-render": "0.0.256",
+    "xtal-element": "0.0.296",
     "xtal-shell": "0.0.25"
   },
   "devDependencies": {
-    "@webcomponents/webcomponentsjs": "2.4.3",
-    "xtal-test": "0.0.46",
+    "@webcomponents/webcomponentsjs": "2.4.4",
+    "xtal-test": "0.0.48",
     "p-et-alia": "0.0.115",
     "es-module-shims": "0.5.2",
     "nomodule": "0.0.5"
