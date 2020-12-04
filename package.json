@@ -14,16 +14,16 @@
     "url": "git+https://github.com/bahrus/xtal-deco.git"
   },
   "dependencies": {
-    "trans-render": "0.0.256",
-    "xtal-element": "0.0.296",
+    "trans-render": "0.0.269",
+    "xtal-element": "0.0.315",
     "xtal-shell": "0.0.25"
   },
   "devDependencies": {
     "@webcomponents/webcomponentsjs": "2.4.4",
-    "xtal-test": "0.0.48",
-    "p-et-alia": "0.0.115",
-    "es-module-shims": "0.5.2",
-    "nomodule": "0.0.5"
+    "es-module-shims": "0.7.1",
+    "nomodule": "0.0.7",
+    "p-et-alia": "0.0.120",
+    "xtal-test": "0.0.48"
   },
   "author": "anderson.bruce.b@gmail.com",
   "license": "MIT",
