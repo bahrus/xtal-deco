@@ -75,6 +75,21 @@ To do this, use property/attribute virtualProps/virtual-props:
 
 Doing so causes the property "count" to be stored and retrieved via a [WeakMap](https://stackoverflow.com/a/49879350/3320028).
 
+## Why not wrap the element?
+
+Why not:
+
+```html
+<xtal-deco>
+    <button>...</button>
+</xtal-deco>
+```
+
+?
+
+Explanation can be found [here](https://youtu.be/i6G6dmVJy74?t=49).
+
+
 
 ## Recursive Tree Structures
 
