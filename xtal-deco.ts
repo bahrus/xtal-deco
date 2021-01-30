@@ -1,5 +1,7 @@
-import { XtallatX, define, AttributeProps, PropAction, deconstruct, EventSettings, camelToLisp} from 'xtal-element/xtal-latx.js';
-import { hydrate } from 'trans-render/hydrate.js';
+import {xc, PropAction, PropDef, PropDefMap, ReactiveSurface} from 'xtal-element/lib/XtalCore.js';
+import {EventSettings} from 'xtal-element/types.d.js';
+import {camelToLisp} from 'trans-render/lib/camelToLisp.js';
+import {getDestructArgs} from 'xtal-element/lib/getDestructArgs.js';
 
 //https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
 function getNextSibling (elem: Element, selector: string | undefined) {
@@ -75,7 +77,7 @@ export const linkProxies = ({targets, actions, self, virtualProps, targetToProxy
                 }
                 if(key === 'self') return true;
                 actions.forEach(action =>{
-                    const dependencies = deconstruct(action);
+                    const dependencies = getDestructArgs(action);
                     if(dependencies.includes(key as string)){
                         //TODO:  symbols
                         const arg = Object.assign({}, virtualPropHolder, target);
@@ -172,30 +174,51 @@ export const releaseProxy = ({self, mainTarget}: XtalDeco) => {
     }
 } 
 
-export const propActions = [linkNextSiblingTarget, linkTargets, linkProxies, linkHandlers, doInit, watchForTargetRelease, releaseProxy];
+export const propActions = [linkNextSiblingTarget, linkTargets, linkProxies, linkHandlers, doInit, watchForTargetRelease, releaseProxy] as PropAction[];
 
 type eventHandlers = {[key: string]: ((e: Event) => void)[]};
+
+const obj1 : PropDef = {
+    type: Object,
+    dry: true
+};
+const str1: PropDef = {
+    type: String,
+    dry: true,
+    reflect: true,
+};
+const propDefMap : PropDefMap<XtalDeco> = {
+    nextSiblingTarget: obj1, targets: obj1, init: obj1, actions: obj1, proxies: obj1, on: obj1, mainProxy: obj1, mainTarget: obj1,
+    virtualProps: {
+        type: Object,
+        dry: true,
+        parse: true,
+    },
+    targetToProxyMap: {
+        type: Object,
+        dry: true,
+        notify: true,
+    },
+    matchClosest: str1,
+    whereTargetSelector: str1,
+};
+const slicedPropDefs = xc.getSlicedPropDefs(propDefMap);
 
 /**
  * Attach / override behavior onto the next element
  * @element xtal-deco
  * 
  */
-export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends XtallatX(hydrate(HTMLElement)) {
+export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends HTMLElement implements ReactiveSurface{
 
     static is = 'xtal-deco';
 
-    static attributeProps = ({
-        whereTargetSelector, nextSiblingTarget, targets, init, 
-        actions, proxies, on, virtualProps, targetToProxyMap, matchClosest,
-        mainProxy, mainTarget
-    }: XtalDeco) => ({
-       obj: [nextSiblingTarget, targets, init, actions, proxies, on, virtualProps, targetToProxyMap, mainProxy, mainTarget],
-       str: [whereTargetSelector, matchClosest],
-       jsonProp: [virtualProps],
-       notify: [targetToProxyMap],
-       reflect: [matchClosest, whereTargetSelector]
-   } as AttributeProps);
+    self = this;
+    propActions = propActions;
+    reactor = new xc.Reactor(this);
+    onPropChange(n: string, propDef: PropDef, newVal: any){
+        this.reactor.addToQueue(propDef, newVal);
+    }
 
 
     /** 
@@ -232,7 +255,7 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
      */
     virtualProps: string[] | undefined;
 
-    propActions = propActions as PropAction<any>[];
+    
 
     actions: PropAction<any>[] | undefined;
 
@@ -246,12 +269,11 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
 
     connectedCallback() {
         this.style.display = 'none';
-        super.connectedCallback();
+        xc.hydrate<XtalDeco>(this as any as XtalDeco, slicedPropDefs);
         linkNextSiblingTarget(this as any as XtalDeco);
     }
 
     handlers: eventHandlers | undefined;
-
     disconnectedCallback(){
         this.disconnect();
     }
@@ -268,7 +290,8 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
     }
 
 }
-define(XtalDeco);
+xc.letThereBeProps(XtalDeco, slicedPropDefs.propDefs, 'onPropChange');
+xc.define(XtalDeco);
 declare global {
     interface HTMLElementTagNameMap {
         "xtal-deco": XtalDeco,
