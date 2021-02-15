@@ -215,7 +215,7 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
 
     self = this;
     propActions = propActions;
-    reactor = new xc.Reactor(this);
+    reactor = new xc.Rx(this);
     onPropChange(n: string, propDef: PropDef, newVal: any){
         this.reactor.addToQueue(propDef, newVal);
     }
@@ -290,7 +290,7 @@ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends 
     }
 
 }
-xc.letThereBeProps(XtalDeco, slicedPropDefs.propDefs, 'onPropChange');
+xc.letThereBeProps<XtalDeco>(XtalDeco, slicedPropDefs.propDefs, 'onPropChange');
 xc.define(XtalDeco);
 declare global {
     interface HTMLElementTagNameMap {

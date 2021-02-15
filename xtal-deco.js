@@ -203,7 +203,7 @@ export class XtalDeco extends HTMLElement {
         super(...arguments);
         this.self = this;
         this.propActions = propActions;
-        this.reactor = new xc.Reactor(this);
+        this.reactor = new xc.Rx(this);
         this.nextSiblingTarget = null;
         this.targetToProxyMap = new WeakMap();
     }
