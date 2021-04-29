@@ -180,6 +180,15 @@ export const linkProxies = ({targets, actions, self, virtualProps, targetToProxy
                         action(arg as HTMLElement);
                     }
                 });
+                switch(typeof key){
+                    case 'string':
+                        self.dispatchEvent(new CustomEvent(camelToLisp(key) + '-changed', {
+                            detail:{
+                                value: value
+                            }
+                        }));
+                        break;
+                }
                 for(const subscription of self.subscribers){
                     if(subscription.propsOfInterest.has(key)){
                         subscription.callBack(target, self);

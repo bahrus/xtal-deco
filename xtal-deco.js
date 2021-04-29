@@ -1,4 +1,5 @@
 import { xc } from 'xtal-element/lib/XtalCore.js';
+import { camelToLisp } from 'trans-render/lib/camelToLisp.js';
 import { getDestructArgs } from 'xtal-element/lib/getDestructArgs.js';
 /**
  * Attach / override behavior onto the next element
@@ -130,6 +131,15 @@ export const linkProxies = ({ targets, actions, self, virtualProps, targetToProx
                         action(arg);
                     }
                 });
+                switch (typeof key) {
+                    case 'string':
+                        self.dispatchEvent(new CustomEvent(camelToLisp(key) + '-changed', {
+                            detail: {
+                                value: value
+                            }
+                        }));
+                        break;
+                }
                 for (const subscription of self.subscribers) {
                     if (subscription.propsOfInterest.has(key)) {
                         subscription.callBack(target, self);

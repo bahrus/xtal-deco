@@ -10,7 +10,7 @@
 
 <body>
     <div>
-        <xtal-deco virtual-props='["count"]'><script nomodule=ish>
+        <xtal-deco disabled  virtual-props='["count"]'><script nomodule=ish>
             const decoProps = {
                 actions: [
                     ({count, self}) => {
@@ -29,8 +29,8 @@
             Object.assign(selfish.parentElement, decoProps);
 
         </script></xtal-deco>
-        <button disabled data-drink-selection="Butterbeer">Click me to Order Your Drink</button>
-        <on-to-me on="count-changed" to=[-text-content] val=detail.value></on-to-me>
+        <button data-drink-selection="Butterbeer">Click me to Order Your Drink</button>
+        <on-to-me observe=xtal-deco on="count-changed" to=[-text-content] val=detail.value></on-to-me>
         <span -text-content></span> drinks sold.
         <script type=importmap>
         {
