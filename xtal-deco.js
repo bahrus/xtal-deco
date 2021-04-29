@@ -1,6 +1,53 @@
 import { xc } from 'xtal-element/lib/XtalCore.js';
-import { camelToLisp } from 'trans-render/lib/camelToLisp.js';
 import { getDestructArgs } from 'xtal-element/lib/getDestructArgs.js';
+/**
+ * Attach / override behavior onto the next element
+ * @element xtal-deco
+ *
+ */
+export class XtalDeco extends HTMLElement {
+    constructor() {
+        super(...arguments);
+        this.self = this;
+        this.propActions = propActions;
+        this.reactor = new xc.Rx(this);
+        this.nextSiblingTarget = null;
+        this.targetToProxyMap = new WeakMap();
+        this.subscribers = [];
+    }
+    onPropChange(n, propDef, newVal) {
+        this.reactor.addToQueue(propDef, newVal);
+    }
+    connectedCallback() {
+        this.style.display = 'none';
+        xc.hydrate(this, slicedPropDefs);
+        linkNextSiblingTarget(this);
+    }
+    disconnectedCallback() {
+        this.disconnect();
+    }
+    disconnect() {
+        if (this.targets === undefined || this.handlers === undefined)
+            return;
+        this.targets.forEach(target => {
+            for (const key in this.handlers) {
+                const targetHandlers = this.handlers[key];
+                targetHandlers.forEach(targetHandler => {
+                    target.removeEventListener(key, targetHandler);
+                });
+            }
+        });
+    }
+    subscribe(propsOfInterest, callBack) {
+        this.subscribers.push({ propsOfInterest, callBack });
+    }
+    unsubscribe(propsOfInterest, callBack) {
+        const idx = this.subscribers.findIndex(s => s.propsOfInterest === propsOfInterest && s.callBack === callBack);
+        if (idx > -1)
+            this.subscribers.splice(idx, 1);
+    }
+}
+XtalDeco.is = 'xtal-deco';
 //https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
 function getNextSibling(elem, selector) {
     // Get the next sibling element
@@ -83,14 +130,10 @@ export const linkProxies = ({ targets, actions, self, virtualProps, targetToProx
                         action(arg);
                     }
                 });
-                switch (typeof key) {
-                    case 'string':
-                        target.dispatchEvent(new CustomEvent(camelToLisp(key) + '-changed', {
-                            detail: {
-                                value: value
-                            }
-                        }));
-                        break;
+                for (const subscription of self.subscribers) {
+                    if (subscription.propsOfInterest.has(key)) {
+                        subscription.callBack(target, self);
+                    }
                 }
                 return true;
             },
@@ -193,44 +236,5 @@ const propDefMap = {
     whereTargetSelector: str1,
 };
 const slicedPropDefs = xc.getSlicedPropDefs(propDefMap);
-/**
- * Attach / override behavior onto the next element
- * @element xtal-deco
- *
- */
-export class XtalDeco extends HTMLElement {
-    constructor() {
-        super(...arguments);
-        this.self = this;
-        this.propActions = propActions;
-        this.reactor = new xc.Rx(this);
-        this.nextSiblingTarget = null;
-        this.targetToProxyMap = new WeakMap();
-    }
-    onPropChange(n, propDef, newVal) {
-        this.reactor.addToQueue(propDef, newVal);
-    }
-    connectedCallback() {
-        this.style.display = 'none';
-        xc.hydrate(this, slicedPropDefs);
-        linkNextSiblingTarget(this);
-    }
-    disconnectedCallback() {
-        this.disconnect();
-    }
-    disconnect() {
-        if (this.targets === undefined || this.handlers === undefined)
-            return;
-        this.targets.forEach(target => {
-            for (const key in this.handlers) {
-                const targetHandlers = this.handlers[key];
-                targetHandlers.forEach(targetHandler => {
-                    target.removeEventListener(key, targetHandler);
-                });
-            }
-        });
-    }
-}
-XtalDeco.is = 'xtal-deco';
-xc.letThereBeProps(XtalDeco, slicedPropDefs.propDefs, 'onPropChange');
+xc.letThereBeProps(XtalDeco, slicedPropDefs, 'onPropChange');
 xc.define(XtalDeco);

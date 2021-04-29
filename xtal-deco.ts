@@ -1,8 +1,104 @@
-import {xc, PropAction, PropDef, PropDefMap, ReactiveSurface} from 'xtal-element/lib/XtalCore.js';
+import {xc, PropAction, PropDef, PropDefMap, ReactiveSurface, IReactor} from 'xtal-element/lib/XtalCore.js';
 import {EventSettings} from 'xtal-element/types.d.js';
 import {camelToLisp} from 'trans-render/lib/camelToLisp.js';
 import {getDestructArgs} from 'xtal-element/lib/getDestructArgs.js';
 
+/**
+ * Attach / override behavior onto the next element
+ * @element xtal-deco
+ * 
+ */
+ export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends HTMLElement implements ReactiveSurface{
+
+    static is = 'xtal-deco';
+
+    self = this;
+    propActions = propActions;
+    reactor: IReactor = new xc.Rx(this);
+    onPropChange(n: string, propDef: PropDef, newVal: any){
+        this.reactor.addToQueue(propDef, newVal);
+    }
+
+
+    /** 
+     * Selector to search for within the next element. 
+     * This will select the target elements(s) to which properties and methods will be attached.
+     * @attr where-target-selector
+    */
+    whereTargetSelector: string | undefined;
+
+    nextSiblingTarget: Element | null = null;
+
+    /**
+     * temporary holder of target elements to apply proxy to.
+     */
+    targets: Element[] | undefined;
+
+    /**
+     * temporary holder of proxies that need initalizing.
+     */
+    proxies: Element[] | undefined;
+
+    /**
+     * Proxy for the target element (not the elements matching whereTargetSelector)
+     */
+    mainProxy: Element | undefined;
+
+    /**
+     * Main Target Element
+     */
+    mainTarget: Element | undefined;
+
+    /**
+     * Set these properties via a weakmap, rather than on the (native) element itself.
+     */
+    virtualProps: string[] | undefined;
+
+    
+
+    actions: PropAction<any>[] | undefined;
+
+    init: PropAction<TTargetElement> | undefined;
+
+    on: EventSettings | undefined;
+
+    matchClosest: string | undefined;
+
+    targetToProxyMap: WeakMap<any, any> = new WeakMap();
+
+    connectedCallback() {
+        this.style.display = 'none';
+        xc.hydrate<XtalDeco>(this as any as XtalDeco, slicedPropDefs);
+        linkNextSiblingTarget(this as any as XtalDeco);
+    }
+
+    handlers: eventHandlers | undefined;
+    disconnectedCallback(){
+        this.disconnect();
+    }
+    disconnect(){
+        if(this.targets === undefined || this.handlers === undefined) return;
+        this.targets.forEach(target =>{
+            for(const key in this.handlers){
+                const targetHandlers = this.handlers[key];
+                targetHandlers.forEach(targetHandler => {
+                    target.removeEventListener(key, targetHandler);
+                })
+            }
+        })
+    }
+
+    subscribers: {propsOfInterest: Set<string | symbol>, callBack: (t: TTargetElement, x: XtalDeco<TTargetElement>) => void}[] = [];
+    subscribe(propsOfInterest: Set<string>, callBack: (t: TTargetElement, x: XtalDeco<TTargetElement>) => void){
+        this.subscribers.push({propsOfInterest, callBack})
+    }
+
+    unsubscribe(propsOfInterest: Set<string>, callBack: (t: TTargetElement, x: XtalDeco<TTargetElement>) => void){
+        const idx = this.subscribers.findIndex(s => s.propsOfInterest === propsOfInterest && s.callBack === callBack);
+        if(idx > -1) this.subscribers.splice(idx, 1);
+    }
+
+}
 //https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
 function getNextSibling (elem: Element, selector: string | undefined) {
 
@@ -84,14 +180,10 @@ export const linkProxies = ({targets, actions, self, virtualProps, targetToProxy
                         action(arg as HTMLElement);
                     }
                 });
-                switch(typeof key){
-                    case 'string':
-                        target.dispatchEvent(new CustomEvent(camelToLisp(key) + '-changed', {
-                            detail:{
-                                value: value
-                            }
-                        }));
-                        break;
+                for(const subscription of self.subscribers){
+                    if(subscription.propsOfInterest.has(key)){
+                        subscription.callBack(target, self);
+                    }
                 }
                 return true;
             },
@@ -204,93 +296,8 @@ const propDefMap : PropDefMap<XtalDeco> = {
 };
 const slicedPropDefs = xc.getSlicedPropDefs(propDefMap);
 
-/**
- * Attach / override behavior onto the next element
- * @element xtal-deco
- * 
- */
-export class XtalDeco<TTargetElement extends HTMLElement = HTMLElement> extends HTMLElement implements ReactiveSurface{
 
-    static is = 'xtal-deco';
-
-    self = this;
-    propActions = propActions;
-    reactor = new xc.Rx(this);
-    onPropChange(n: string, propDef: PropDef, newVal: any){
-        this.reactor.addToQueue(propDef, newVal);
-    }
-
-
-    /** 
-     * Selector to search for within the next element. 
-     * This will select the target elements(s) to which properties and methods will be attached.
-     * @attr where-target-selector
-    */
-    whereTargetSelector: string | undefined;
-
-    nextSiblingTarget: Element | null = null;
-
-    /**
-     * temporary holder of target elements to apply proxy to.
-     */
-    targets: Element[] | undefined;
-
-    /**
-     * temporary holder of proxies that need initalizing.
-     */
-    proxies: Element[] | undefined;
-
-    /**
-     * Proxy for the target element (not the elements matching whereTargetSelector)
-     */
-    mainProxy: Element | undefined;
-
-    /**
-     * Main Target Element
-     */
-    mainTarget: Element | undefined;
-
-    /**
-     * Set these properties via a weakmap, rather than on the (native) element itself.
-     */
-    virtualProps: string[] | undefined;
-
-    
-
-    actions: PropAction<any>[] | undefined;
-
-    init: PropAction<TTargetElement> | undefined;
-
-    on: EventSettings | undefined;
-
-    matchClosest: string | undefined;
-
-    targetToProxyMap: WeakMap<any, any> = new WeakMap();
-
-    connectedCallback() {
-        this.style.display = 'none';
-        xc.hydrate<XtalDeco>(this as any as XtalDeco, slicedPropDefs);
-        linkNextSiblingTarget(this as any as XtalDeco);
-    }
-
-    handlers: eventHandlers | undefined;
-    disconnectedCallback(){
-        this.disconnect();
-    }
-    disconnect(){
-        if(this.targets === undefined || this.handlers === undefined) return;
-        this.targets.forEach(target =>{
-            for(const key in this.handlers){
-                const targetHandlers = this.handlers[key];
-                targetHandlers.forEach(targetHandler => {
-                    target.removeEventListener(key, targetHandler);
-                })
-            }
-        })
-    }
-
-}
-xc.letThereBeProps<XtalDeco>(XtalDeco, slicedPropDefs.propDefs, 'onPropChange');
+xc.letThereBeProps<XtalDeco>(XtalDeco, slicedPropDefs, 'onPropChange');
 xc.define(XtalDeco);
 declare global {
     interface HTMLElementTagNameMap {
