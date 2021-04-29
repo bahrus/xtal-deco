@@ -18,7 +18,7 @@
     "xtal-element": "0.0.389"
   },
   "devDependencies": {
-    "nomodule": "0.0.10",
+    "nomodule": "0.0.11",
     "on-to-me": "0.0.20",
     "xtal-test": "0.0.50"
   },
