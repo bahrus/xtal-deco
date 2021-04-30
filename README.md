@@ -57,7 +57,7 @@ Syntax example:
     Object.assign(selfish.parentElement, decoProps);
 </script></xtal-deco>
 <button disabled data-drink-selection="Butterbeer">Click me to Order Your Drink</button>
-<p-d on="count-changed" prop=textContent val=target.count></p-d>
+<p-d observe=xtal-deco on="count-changed" prop=textContent val=target.count></p-d>
 <span></span> drinks sold.
 
 ```
