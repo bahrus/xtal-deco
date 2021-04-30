@@ -10,6 +10,8 @@ Proxy neighboring DOM (custom) element.
 
 xtal-deco provides a base class for adding behavior to the next sibling element -- "decorating" the element, via an [ES6 proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy).  
 
+It is one member of the family of xtal-deco* elements, provided as an alternative to the [built-in native element extension](https://bkardell.com/blog/TheWalrus.html).
+
 The affected element can be a native DOM element, or a custom element instance. 
 
 xtal-deco has a property, "actions" that allows for a "reactive" way of responding to property changes passed through via the proxy.

@@ -14,7 +14,14 @@ export class XtalDeco extends HTMLElement {
         this.reactor = new xc.Rx(this);
         this.nextSiblingTarget = null;
         this.targetToProxyMap = new WeakMap();
-        this.subscribers = [];
+        // subscribers: {propsOfInterest: Set<string | symbol>, callBack: (t: TTargetElement, x: XtalDeco<TTargetElement>) => void}[] = [];
+        // subscribe(propsOfInterest: Set<string>, callBack: (t: TTargetElement, x: XtalDeco<TTargetElement>) => void){
+        //     this.subscribers.push({propsOfInterest, callBack})
+        // }
+        // unsubscribe(propsOfInterest: Set<string>, callBack: (t: TTargetElement, x: XtalDeco<TTargetElement>) => void){
+        //     const idx = this.subscribers.findIndex(s => s.propsOfInterest === propsOfInterest && s.callBack === callBack);
+        //     if(idx > -1) this.subscribers.splice(idx, 1);
+        // }
     }
     onPropChange(n, propDef, newVal) {
         this.reactor.addToQueue(propDef, newVal);
@@ -38,14 +45,6 @@ export class XtalDeco extends HTMLElement {
                 });
             }
         });
-    }
-    subscribe(propsOfInterest, callBack) {
-        this.subscribers.push({ propsOfInterest, callBack });
-    }
-    unsubscribe(propsOfInterest, callBack) {
-        const idx = this.subscribers.findIndex(s => s.propsOfInterest === propsOfInterest && s.callBack === callBack);
-        if (idx > -1)
-            this.subscribers.splice(idx, 1);
     }
 }
 XtalDeco.is = 'xtal-deco';
@@ -140,11 +139,11 @@ export const linkProxies = ({ targets, actions, self, virtualProps, targetToProx
                         }));
                         break;
                 }
-                for (const subscription of self.subscribers) {
-                    if (subscription.propsOfInterest.has(key)) {
-                        subscription.callBack(target, self);
-                    }
-                }
+                // for(const subscription of self.subscribers){
+                //     if(subscription.propsOfInterest.has(key)){
+                //         subscription.callBack(target, self);
+                //     }
+                // }
                 return true;
             },
             get: (target, key) => {
@@ -190,7 +189,6 @@ export const linkHandlers = ({ proxies, on, self }) => {
                     });
                     return eventSetting;
                 });
-                //handlers[key] = targetHandlers;
                 break;
             default:
                 throw 'not implemented yet';

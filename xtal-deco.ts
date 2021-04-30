@@ -88,15 +88,15 @@ import {getDestructArgs} from 'xtal-element/lib/getDestructArgs.js';
         })
     }
 
-    subscribers: {propsOfInterest: Set<string | symbol>, callBack: (t: TTargetElement, x: XtalDeco<TTargetElement>) => void}[] = [];
-    subscribe(propsOfInterest: Set<string>, callBack: (t: TTargetElement, x: XtalDeco<TTargetElement>) => void){
-        this.subscribers.push({propsOfInterest, callBack})
-    }
+    // subscribers: {propsOfInterest: Set<string | symbol>, callBack: (t: TTargetElement, x: XtalDeco<TTargetElement>) => void}[] = [];
+    // subscribe(propsOfInterest: Set<string>, callBack: (t: TTargetElement, x: XtalDeco<TTargetElement>) => void){
+    //     this.subscribers.push({propsOfInterest, callBack})
+    // }
 
-    unsubscribe(propsOfInterest: Set<string>, callBack: (t: TTargetElement, x: XtalDeco<TTargetElement>) => void){
-        const idx = this.subscribers.findIndex(s => s.propsOfInterest === propsOfInterest && s.callBack === callBack);
-        if(idx > -1) this.subscribers.splice(idx, 1);
-    }
+    // unsubscribe(propsOfInterest: Set<string>, callBack: (t: TTargetElement, x: XtalDeco<TTargetElement>) => void){
+    //     const idx = this.subscribers.findIndex(s => s.propsOfInterest === propsOfInterest && s.callBack === callBack);
+    //     if(idx > -1) this.subscribers.splice(idx, 1);
+    // }
 
 }
 //https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
@@ -189,11 +189,11 @@ export const linkProxies = ({targets, actions, self, virtualProps, targetToProxy
                         }));
                         break;
                 }
-                for(const subscription of self.subscribers){
-                    if(subscription.propsOfInterest.has(key)){
-                        subscription.callBack(target, self);
-                    }
-                }
+                // for(const subscription of self.subscribers){
+                //     if(subscription.propsOfInterest.has(key)){
+                //         subscription.callBack(target, self);
+                //     }
+                // }
                 return true;
             },
             get:(target, key)=>{
@@ -242,7 +242,6 @@ export const linkHandlers = ({proxies, on, self}: XtalDeco) => {
                     });
                     return eventSetting;
                 });
-                //handlers[key] = targetHandlers;
                 break;
             default:
                 throw 'not implemented yet';
