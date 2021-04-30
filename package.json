@@ -1,12 +1,28 @@
 {
   "name": "xtal-deco",
   "version": "0.0.28",
+  "keywords": [
+    "Web Components",
+    "Custom Elements",
+    "Decorator",
+    "Built-In"
+  ],
   "description": "Add properties / methods to other DOM (custom) elements.",
   "main": "xtal-deco.js",
   "module": "xtal-deco.js",
+  "exports": {
+    ".": "./xtal-deco.js",
+    "./xtal-deco.js": "./xtal-deco.js"
+  },
+  "files": [
+    "xtal-deco.*",
+    "types.d.ts"
+  ],
+  "types": "types.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "serve": "node node_modules/xtal-test/serve.js",
+    "package-check": "package-check",
     "doc": "wca analyze xtal-*.js --outFile custom-elements.json"
   },
   "repository": {
@@ -18,6 +34,7 @@
     "xtal-element": "0.0.389"
   },
   "devDependencies": {
+    "@skypack/package-check": "0.2.2",
     "nomodule": "0.0.11",
     "on-to-me": "0.0.20",
     "xtal-test": "0.0.50"
