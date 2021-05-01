@@ -12,7 +12,7 @@ xtal-deco provides a base class for adding behavior to the next sibling element 
 
 It is inspired by [decorators](https://www.programiz.com/python-programming/decorator)/[annotations](https://docs.oracle.com/javase/tutorial/java/annotations/basics.html)/[attributes](https://codewithshadman.com/csharp-attributes/)[.](https://doc.rust-lang.org/reference/attributes.html)  Rather than declaratively applying to a class or class member beneath the decorator/annotation/attribute, an xtal-deco (or xtal-deco derived elements) instance applies behavior/functionality to the native or custom DOM element beneath it. 
 
-xtal-deco is one member of [a](https://github.com/bahrus/xtal-decor) [trio](https://github.com/bahrus/xtal-decorator) of related elements, provided as an alternative to the [built-in native element extension](https://bkardell.com/blog/TheWalrus.html).
+xtal-deco is one member of [a](https://github.com/bahrus/xtal-decor) [trio](https://github.com/bahrus/xtal-decorator) of related elements, provided as an alternative to the [controversial built-in native element extension](https://bkardell.com/blog/TheWalrus.html).
 
 xtal-deco has a property, "actions" that allows for a "reactive" way of responding to property changes passed through via the proxy.
 
@@ -33,13 +33,13 @@ The other key properties of xtal-deco are:
 
 ## Setting proxyActions
 
-There are two straightforward ways of setting the actions (and other object properties), depending on your needs:
+There are two straightforward ways of setting the actions/on/init, depending on your needs:
 
-1.  Extend class XtalDeco, and implement actions, via the constructor or via [instanceFields](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Public_class_fields).
+1.  Extend class XtalDeco, and specify the actions/on/init properties in the constructor or via [instanceFields](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Public_class_fields).
 2.  Inline actions in the HTML markup.  Use something like [nomodule](https://github.com/bahrus/nomodule).
 
 
-Syntax example:
+Syntax example for approach 2:
 
 
 ```html
@@ -63,7 +63,7 @@ Syntax example:
 </script></xtal-deco>
 <button disabled data-drink-selection="Butterbeer">Click me to Order Your Drink</button>
 <!-- p-d is short for "pass-down" -->
-<p-d observe=xtal-deco on="count-changed" prop=textContent val=target.count></p-d>
+<p-d observe=xtal-deco on="count-changed" to=[-text-content] val=detail.value></p-d>
 <span></span> drinks sold.
 
 ```
