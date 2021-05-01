@@ -10,9 +10,9 @@ Proxy neighboring DOM (custom) element.
 
 xtal-deco provides a base class for adding behavior to the next sibling element -- "decorating" the element, via an [ES6 proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy).  
 
-It is one member of the family of xtal-deco* elements, provided as an alternative to the [built-in native element extension](https://bkardell.com/blog/TheWalrus.html).
+It is inspired by [decorators](https://www.programiz.com/python-programming/decorator)/[annotations](https://docs.oracle.com/javase/tutorial/java/annotations/basics.html)/[attributes](https://codewithshadman.com/csharp-attributes/)[.](https://doc.rust-lang.org/reference/attributes.html)  Rather than declaratively applying to a class or class member beneath the decorator/annotation/attribute, an xtal-deco (or xtal-deco derived elements) instance applies behavior/functionality to the native or custom DOM element beneath it. 
 
-The affected element can be a native DOM element, or a custom element instance. 
+xtal-deco is one member of [a](https://github.com/bahrus/xtal-decor) [trio](https://github.com/bahrus/xtal-decorator) of related elements, provided as an alternative to the [built-in native element extension](https://bkardell.com/blog/TheWalrus.html).
 
 xtal-deco has a property, "actions" that allows for a "reactive" way of responding to property changes passed through via the proxy.
 
@@ -25,6 +25,11 @@ actions: [
     }
 ]
 ```
+
+The other key properties of xtal-deco are:
+
+1.  on -- This is where we attach event listeners on the target element.
+2.  init -- This is where we initialize the behavior.
 
 ## Setting proxyActions
 
@@ -57,25 +62,28 @@ Syntax example:
     Object.assign(selfish.parentElement, decoProps);
 </script></xtal-deco>
 <button disabled data-drink-selection="Butterbeer">Click me to Order Your Drink</button>
+<!-- p-d is short for "pass-down" -->
 <p-d observe=xtal-deco on="count-changed" prop=textContent val=target.count></p-d>
 <span></span> drinks sold.
 
 ```
 
-**NB I:**  Here, we are, via a proxy, setting a field value on an existing native DOM element -- button in this case.  
+All property changes cause an event to fire with the lisp-case name of the property followed by -changed.  So in the example above, when the "count" property changes, the decorator element (xtal-deco) fires and event "count-changed."
+
+**NB I:**  Here we are, via a proxy, setting a field value on an existing native DOM element -- button in this case.  
 
 "Throwing new properties" on another DOM element is [considered problematic](https://youtu.be/uygxJ8Wxotc?t=319).  Consequently,
 this web component has a protective curse -- anyone trying to add a new property or a method onto another element will receive a one-way ticket to Azkaban.
 
 However, the ability to add new data elements is critical when enhancing behavior.  We need the ability to add new properties onto our proxy only.
 
-To do this, use property/attribute virtualProps/virtual-props:
+To do this, use property/attribute virtualProps/virtual-props, which allows for an array of string properties to be specified:
 
 ```html
-<xtal-deco virtual-props='["count"]'></xtal-deco>
+<xtal-deco virtual-props='["count", "revenue"]'></xtal-deco>
 ```
 
-Doing so causes the property "count" to be stored and retrieved via a [WeakMap](https://stackoverflow.com/a/49879350/3320028).
+Doing so causes the properties "count" and "revenue" to be stored and retrieved via a [WeakMap](https://stackoverflow.com/a/49879350/3320028).
 
 ## Why not wrap the element?
 
@@ -92,18 +100,17 @@ Why not:
 Explanation can be found [here](https://youtu.be/i6G6dmVJy74?t=49).
 
 
-
 ## Recursive Tree Structures
 
 For recursive tree structures, you can, in addition to the next sibling, target children of the target element via the whereTargetSelector/where-target-selector property / attribute.
 
 ## Closest match
 
-If multiple decorators are needed on the same element, then at least one of the decorators will need to skip over the other decorators.  You can specify what element to target from the set of nextElementSiblings via the matchClosest / match-closest property/attribute.
+If multiple decorators are needed on the same element, then at least one of the decorators will need to skip over the other decorators.  You can specify which element to target from the set of nextElementSiblings via the matchClosest / match-closest property/attribute.
 
 ##  Externally apply properties to the target element via the proxy.
 
-xtal-deco creates a WeakMap property, targetToProxyMap, which allows you to pass in the target DOM element, and get the proxy.
+xtal-deco creates a WeakMap property, targetToProxyMap, which allows us retrieve the proxy from the target DOM element.  We can then set property values programmatically.
 
 However, this is rather clumsy in practice.
 
@@ -111,7 +118,15 @@ Another way to handle this is to define properties that need passing from extern
 
 ## Running locally
 
+1.  Install node.js
+2.  Fork and/or clone https://github.com/bahrus/xtal-deco
+3.  Open a command window to the fork or clone directory on your local machine
+
 ```
 $ npm install
 $ npm run serve
 ```
+
+Now open a browser to http://localhost:3030/demo/dev.html
+
+
