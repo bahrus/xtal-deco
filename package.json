@@ -30,14 +30,14 @@
     "url": "git+https://github.com/bahrus/xtal-deco.git"
   },
   "dependencies": {
-    "trans-render": "0.0.286",
-    "xtal-element": "0.0.389"
+    "trans-render": "0.0.298",
+    "xtal-element": "0.0.422"
   },
   "devDependencies": {
     "@skypack/package-check": "0.2.2",
-    "nomodule": "0.0.11",
-    "on-to-me": "0.0.20",
-    "xtal-test": "0.0.50"
+    "nomodule": "0.0.15",
+    "on-to-me": "0.0.35",
+    "xtal-test": "0.0.51"
   },
   "author": "anderson.bruce.b@gmail.com",
   "license": "MIT",

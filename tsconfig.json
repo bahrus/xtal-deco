@@ -8,6 +8,9 @@
 		"strict": true,
 		"watch": true
 	},
+	"files": [
+		"xtal-deco2.ts"
+	],
 	"exclude":[
 		"node_modules"
 	]
