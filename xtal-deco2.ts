@@ -1,8 +1,8 @@
 import {define, camelToLisp} from 'trans-render/lib/define.js';
-import {XtalDecoProps, eventHandlers} from './types.d.js';
+import {XtalDecoProps, eventHandlers, IXtalDeco} from './types.d.js';
 import {getDestructArgs} from 'xtal-element/lib/getDestructArgs.js';
 
-const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseClass implements XtalDeco{
+const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseClass implements IXtalDeco{
 
     targetToProxyMap: WeakMap<any, any> = new WeakMap();
 
@@ -142,30 +142,21 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
 
     watchForTargetRelease(self: x){
         const {mainTarget} = self;
-        onRemove(mainTarget, () =>{
+        onRemove(mainTarget!, () =>{
             self.mainTarget = undefined;
         });
     }
 };
 
 
-export interface XtalDeco extends XtalDecoProps, HTMLElement{
-    linkProxies(self: x): void;
-    linkTargetsWithSelector(self: x): void;
-    linkTargetsNoSelector(self: x): void;
-    linkNextSiblingTarget(self: x): void;
-    linkHandlers(self: x): void;
-    doDisconnect(self: x): void;
-    doInit(self: x): void;
-    watchForTargetRelease(self: x): void;
-}
 
-type x = XtalDeco;
+
+type x = IXtalDeco;
 
 
 //export interface XtalDeco extends HTMLElement, XtalDecoMethods{}
 
-export const XtalDeco = define<XtalDeco>({
+export const XtalDeco = define<IXtalDeco>({
     config:{
         tagName: 'xtal-deco',
         actions: [
@@ -206,7 +197,7 @@ export const XtalDeco = define<XtalDeco>({
         ]
     },
     mixins: [XtalDecoMixin]
-}) as {new(): XtalDeco};
+}) as {new(): IXtalDeco};
 
 //https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
 function getNextSibling (elem: Element, selector: string | undefined) {
@@ -222,6 +213,30 @@ function getNextSibling (elem: Element, selector: string | undefined) {
 		sibling = sibling.nextElementSibling
 	}
     return sibling;
+};
+
+declare global {
+    interface HTMLElementTagNameMap {
+        "xtal-deco": IXtalDeco,
+    }
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Mutation_events#Mutation_Observers_alternatives_examples
+//can't we use https://developer.mozilla.org/en-US/docs/Web/API/Node/contains#:~:text=The%20Node.,direct%20children%2C%20and%20so%20on.?
+function onRemove(element: Element, callback: Function) {
+    let observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation =>{
+            mutation.removedNodes.forEach(removed =>{
+                if(element === removed){
+                    callback();
+                    observer.disconnect();
+                }
+            })
+        })
+    });
+    observer.observe(element.parentElement || element.getRootNode(), {
+        childList: true,
+    });
 };
 
 
