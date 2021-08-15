@@ -9,7 +9,7 @@
 		"watch": true
 	},
 	"files": [
-		"xtal-deco2.ts"
+		"xtal-deco.ts"
 	],
 	"exclude":[
 		"node_modules"
