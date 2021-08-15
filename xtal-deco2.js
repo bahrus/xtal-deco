@@ -13,7 +13,7 @@ const XtalDecoMixin = (baseClass) => class extends baseClass {
             const proxy = new Proxy(proxyTarget, {
                 set: (target, key, value) => {
                     const virtualPropHolder = virtualPropHolders.get(target);
-                    if (key === 'self' || (virtualProps !== undefined && virtualProps.includes(key))) {
+                    if (key === 'self' || (virtualProps?.includes(key))) {
                         virtualPropHolder[key] = value;
                     }
                     else {
@@ -38,11 +38,6 @@ const XtalDecoMixin = (baseClass) => class extends baseClass {
                             }));
                             break;
                     }
-                    // for(const subscription of self.subscribers){
-                    //     if(subscription.propsOfInterest.has(key)){
-                    //         subscription.callBack(target, self);
-                    //     }
-                    // }
                     return true;
                 },
                 get: (target, key) => {
@@ -137,6 +132,12 @@ const XtalDecoMixin = (baseClass) => class extends baseClass {
         });
         delete self.proxies; //avoid memory leaks
     }
+    watchForTargetRelease(self) {
+        const { mainTarget } = self;
+        onRemove(mainTarget, () => {
+            self.mainTarget = undefined;
+        });
+    }
 };
 //export interface XtalDeco extends HTMLElement, XtalDecoMethods{}
 export const XtalDeco = define({
@@ -150,28 +151,32 @@ export const XtalDeco = define({
             }, {
                 do: 'linkTargetsWithSelector',
                 upon: ['nextSiblingTarget', 'whereTargetSelector'],
-                riff: ['nextSiblingTarget', 'whereTargetSelector']
+                riff: '"'
             }, {
                 do: 'linkTargetsNoSelector',
                 upon: ['nextSiblingTarget'],
-                riff: ['nextSiblingTarget'],
+                riff: '"',
                 rift: ['whereTargetSelector']
             }, {
                 do: 'linkNextSiblingTarget',
                 'upon': ['nextSiblingTarget'],
-                'riff': ['nextSiblingTarget'],
+                'riff': '"',
             }, {
                 do: 'linkHandlers',
                 upon: ['proxies', 'on'],
-                riff: ['proxies', 'on']
+                riff: '"'
             }, {
                 do: 'doDisconnect',
                 upon: ['targets', 'handlers', 'disconnect'],
-                riff: ['targets', 'handlers', 'disconnect']
+                riff: '"'
             }, {
                 do: 'doInit',
                 upon: ['proxies', 'init'],
-                riff: ['proxies', 'init']
+                riff: '"'
+            }, {
+                do: 'watchForTargetRelease',
+                upon: ['mainTarget'],
+                riff: '"',
             }
         ]
     },

@@ -6,7 +6,7 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
 
     targetToProxyMap: WeakMap<any, any> = new WeakMap();
 
-    linkProxies(self: X){
+    linkProxies(self: x){
         const {targets, actions, virtualProps, targetToProxyMap} = self;
         const proxies: Element[] = [];
         const virtualPropHolders = new WeakMap();
@@ -15,7 +15,7 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
             const proxy = new Proxy(proxyTarget, {
                 set: (target: any, key, value) => {
                     const virtualPropHolder = virtualPropHolders.get(target);
-                    if(key === 'self' || (virtualProps !== undefined && virtualProps.includes(key as string))){
+                    if(key === 'self' || (virtualProps?.includes(key as string))){
                         virtualPropHolder[key] = value;
                     }else{
                         target[key] = value;
@@ -38,11 +38,6 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
                             }));
                             break;
                     }
-                    // for(const subscription of self.subscribers){
-                    //     if(subscription.propsOfInterest.has(key)){
-                    //         subscription.callBack(target, self);
-                    //     }
-                    // }
                     return true;
                 },
                 get:(target, key)=>{
@@ -70,19 +65,19 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
         delete self.targets; //avoid memory leaks
     }
 
-    linkTargetsWithSelector(self: X){
+    linkTargetsWithSelector(self: x){
         const {nextSiblingTarget, whereTargetSelector} = self;
         const targets = Array.from(nextSiblingTarget!.querySelectorAll(whereTargetSelector!));
         if(nextSiblingTarget!.matches(whereTargetSelector!)) targets.unshift(nextSiblingTarget!);
         self.targets = targets;
     }
 
-    linkTargetsNoSelector(self: X){
+    linkTargetsNoSelector(self: x){
         const {nextSiblingTarget} = self;
         self.targets = [nextSiblingTarget!];
     }
 
-    linkNextSiblingTarget(self: X){
+    linkNextSiblingTarget(self: x){
         const {matchClosest, linkNextSiblingTarget} = self;
         const nextEl = getNextSibling(self, matchClosest);
         if(!nextEl){
@@ -94,7 +89,7 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
         self.nextSiblingTarget = nextEl;
     }
 
-    linkHandlers(self: X){
+    linkHandlers(self: x){
         const {proxies, on} = self;
         const handlers: eventHandlers = {};
         for(var key in on){
@@ -123,7 +118,7 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
         self.handlers = handlers;
     }
 
-    doDisconnect(self: X){
+    doDisconnect(self: x){
         const {targets, handlers} = self;
         targets!.forEach(target =>{
             for(const key in handlers){
@@ -136,7 +131,7 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
         self.disconnect = false;
     }
 
-    doInit(self: X){
+    doInit(self: x){
         const {proxies, init} = self;
         proxies!.forEach((target: any) => {
             target.self = target;
@@ -144,20 +139,28 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
         }); 
         delete self.proxies; //avoid memory leaks
     }
+
+    watchForTargetRelease(self: x){
+        const {mainTarget} = self;
+        onRemove(mainTarget, () =>{
+            self.mainTarget = undefined;
+        });
+    }
 };
 
 
 export interface XtalDeco extends XtalDecoProps, HTMLElement{
-    linkProxies(self: X): void;
-    linkTargetsWithSelector(self: X): void;
-    linkTargetsNoSelector(self: X): void;
-    linkNextSiblingTarget(self: X): void;
-    linkHandlers(self: X): void;
-    doDisconnect(self: X): void;
-    doInit(self: X): void;
+    linkProxies(self: x): void;
+    linkTargetsWithSelector(self: x): void;
+    linkTargetsNoSelector(self: x): void;
+    linkNextSiblingTarget(self: x): void;
+    linkHandlers(self: x): void;
+    doDisconnect(self: x): void;
+    doInit(self: x): void;
+    watchForTargetRelease(self: x): void;
 }
 
-type X = XtalDeco;
+type x = XtalDeco;
 
 
 //export interface XtalDeco extends HTMLElement, XtalDecoMethods{}
@@ -173,28 +176,32 @@ export const XtalDeco = define<XtalDeco>({
             },{
                 do: 'linkTargetsWithSelector',
                 upon: ['nextSiblingTarget', 'whereTargetSelector'],
-                riff: ['nextSiblingTarget', 'whereTargetSelector']
+                riff: '"'
             },{ //verbose if condition -- overkill ?
                 do: 'linkTargetsNoSelector',
                 upon: ['nextSiblingTarget'],
-                riff: ['nextSiblingTarget'],
+                riff: '"',
                 rift: ['whereTargetSelector']
             },{
                 do: 'linkNextSiblingTarget',
                 'upon': ['nextSiblingTarget'],
-                'riff': ['nextSiblingTarget'],
+                'riff': '"',
             },{
                 do: 'linkHandlers',
                 upon: ['proxies', 'on'],
-                riff: ['proxies', 'on']
+                riff: '"'
             },{
                 do: 'doDisconnect',
                 upon: ['targets', 'handlers', 'disconnect'],
-                riff: ['targets', 'handlers', 'disconnect']
+                riff: '"'
             },{
                 do: 'doInit',
                 upon: ['proxies', 'init'],
-                riff: ['proxies', 'init']
+                riff: '"'
+            },{
+                do: 'watchForTargetRelease',
+                upon: ['mainTarget'],
+                riff: '"',
             }
         ]
     },
