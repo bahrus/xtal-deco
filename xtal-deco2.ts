@@ -6,6 +6,11 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
 
     targetToProxyMap: WeakMap<any, any> = new WeakMap();
 
+    start(self: x){
+        self.style.display = 'none';
+        self.isC = true;
+    }
+
     linkProxies(self: x){
         const {targets, actions, virtualProps, targetToProxyMap} = self;
         const proxies: Element[] = [];
@@ -78,7 +83,7 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
     }
 
     linkNextSiblingTarget(self: x){
-        const {matchClosest, linkNextSiblingTarget} = self;
+        const {matchClosest, linkNextSiblingTarget, isC} = self;
         const nextEl = getNextSibling(self, matchClosest);
         if(!nextEl){
             setTimeout(() =>{
@@ -159,6 +164,7 @@ type x = IXtalDeco;
 export const XtalDeco = define<IXtalDeco>({
     config:{
         tagName: 'xtal-deco',
+        initMethod: 'start',
         actions: [
             {
                 do: 'linkProxies',
@@ -175,8 +181,8 @@ export const XtalDeco = define<IXtalDeco>({
                 rift: ['whereTargetSelector']
             },{
                 do: 'linkNextSiblingTarget',
-                'upon': ['nextSiblingTarget'],
-                'riff': '"',
+                'upon': ['isC', 'matchClosest'],
+                'riff': ['isC'],
             },{
                 do: 'linkHandlers',
                 upon: ['proxies', 'on'],

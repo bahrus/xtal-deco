@@ -49,6 +49,8 @@ export interface XtalDecoProps<TTargetElement extends Element = Element>{
     handlers?: eventHandlers | undefined;
 
     disconnect?: boolean;
+
+    isC?: boolean;
 }
 
 type x = IXtalDeco;
@@ -61,6 +63,7 @@ export interface IXtalDeco extends XtalDecoProps, HTMLElement{
     doDisconnect(self: x): void;
     doInit(self: x): void;
     watchForTargetRelease(self: x): void;
+    start(self: x): void;
 }
 
 type eventHandlers = {[key: string]: ((e: Event) => void)[]};
