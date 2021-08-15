@@ -17,7 +17,7 @@ const XtalDecoMixin = (baseClass) => class extends baseClass {
             const proxy = new Proxy(proxyTarget, {
                 set: (target, key, value) => {
                     const virtualPropHolder = virtualPropHolders.get(target);
-                    if (key === 'self' || (virtualProps?.includes(key))) {
+                    if (key === 'self' || (virtualProps === null || virtualProps === void 0 ? void 0 : virtualProps.includes(key))) {
                         virtualPropHolder[key] = value;
                     }
                     else {

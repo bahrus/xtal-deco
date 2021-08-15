@@ -2,7 +2,7 @@
 
 <a href="https://nodei.co/npm/xtal-deco/"><img src="https://nodei.co/npm/xtal-deco.png"></a>
 
-<img src="https://badgen.net/bundlephobia/minzip/xtal-deco">
+<img src="https://badgen.net/bundlephobia/minzip/xtal-deco@0.0.32">
 
 Proxy neighboring DOM (custom) element.
 
