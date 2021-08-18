@@ -59,20 +59,20 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
             proxies.push(proxy);
             
         });
-        self.mainProxy = proxies[0];
-        self.mainTarget = targets![0];
-        self.proxies = proxies;
+        const returnObj = {proxies, mainProxy: proxies[0], mainTarget: targets![0]} as px;
         delete self.targets; //avoid memory leaks
+        return returnObj;
     }
 
     linkTargets(self: x){
         const {nextSiblingTarget, whereTargetSelector} = self;
+
         if(whereTargetSelector === undefined){
-            self.targets = [nextSiblingTarget!];
+            return {targets : [nextSiblingTarget!]} as px;
         }else{
             const targets = Array.from(nextSiblingTarget!.querySelectorAll(whereTargetSelector!));
             if(nextSiblingTarget!.matches(whereTargetSelector!)) targets.unshift(nextSiblingTarget!);
-            self.targets = targets;
+            return {targets} as px;
         }
     }
 
@@ -80,14 +80,14 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
 
     linkNextSiblingTarget(self: x){
         const {matchClosest, linkNextSiblingTarget, isC} = self;
-        const nextEl = getNextSibling(self, matchClosest);
-        if(!nextEl){
+        const nextSiblingTarget = getNextSibling(self, matchClosest);
+        if(!nextSiblingTarget){
             setTimeout(() =>{
                 linkNextSiblingTarget(self);
             }, 50);
             return;
         }
-        self.nextSiblingTarget = nextEl;
+        return {nextSiblingTarget};
     }
 
     linkHandlers(self: x){
@@ -114,9 +114,7 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
                     throw 'not implemented yet';
             }
         }
-
-        self.disconnect = true;
-        self.handlers = handlers;
+        return {disconnect: true, handlers} as px;
     }
 
     doDisconnect(self: x){
@@ -128,8 +126,8 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
                     target.removeEventListener(key, targetHandler);
                 })
             }
-        })
-        self.disconnect = false;
+        });
+        return {disconnect: false} as px;
     }
 
     doInit(self: x){
@@ -149,7 +147,7 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
     }
 };
 
-type x = IXtalDeco;
+type x = IXtalDeco; type px = Partial<x>;
 
 
 //export interface XtalDeco extends HTMLElement, XtalDecoMethods{}
@@ -164,23 +162,28 @@ export const XtalDeco = define<IXtalDeco>({
             {
                 do: 'linkProxies',
                 upon: ['targets', 'actions', 'virtualProps'],
-                riff: ['targets', 'actions']
+                riff: ['targets', 'actions'],
+                merge: true,
             },{ 
                 do: 'linkTargets',
                 upon: ['nextSiblingTarget'],
                 riff: '"',
+                merge: true,
             },{
                 do: 'linkNextSiblingTarget',
                 'upon': ['isC', 'matchClosest'],
                 'riff': ['isC'],
+                merge: true,
             },{
                 do: 'linkHandlers',
                 upon: ['proxies', 'on'],
-                riff: '"'
+                riff: '"',
+                merge: true,
             },{
                 do: 'doDisconnect',
                 upon: ['targets', 'handlers', 'disconnect'],
-                riff: '"'
+                riff: '"',
+                merge: true,
             },{
                 do: 'doInit',
                 upon: ['proxies', 'init'],

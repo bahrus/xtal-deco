@@ -59,33 +59,32 @@ export class XtalDecoCore extends HTMLElement {
             targetToProxyMap.set(proxyTarget, proxy);
             proxies.push(proxy);
         });
-        self.mainProxy = proxies[0];
-        self.mainTarget = targets[0];
-        self.proxies = proxies;
+        const returnObj = { proxies, mainProxy: proxies[0], mainTarget: targets[0] };
         delete self.targets; //avoid memory leaks
+        return returnObj;
     }
     linkTargets(self) {
         const { nextSiblingTarget, whereTargetSelector } = self;
         if (whereTargetSelector === undefined) {
-            self.targets = [nextSiblingTarget];
+            return { targets: [nextSiblingTarget] };
         }
         else {
             const targets = Array.from(nextSiblingTarget.querySelectorAll(whereTargetSelector));
             if (nextSiblingTarget.matches(whereTargetSelector))
                 targets.unshift(nextSiblingTarget);
-            self.targets = targets;
+            return { targets };
         }
     }
     linkNextSiblingTarget(self) {
         const { matchClosest, linkNextSiblingTarget, isC } = self;
-        const nextEl = getNextSibling(self, matchClosest);
-        if (!nextEl) {
+        const nextSiblingTarget = getNextSibling(self, matchClosest);
+        if (!nextSiblingTarget) {
             setTimeout(() => {
                 linkNextSiblingTarget(self);
             }, 50);
             return;
         }
-        self.nextSiblingTarget = nextEl;
+        return { nextSiblingTarget };
     }
     linkHandlers(self) {
         const { proxies, on } = self;
@@ -110,8 +109,7 @@ export class XtalDecoCore extends HTMLElement {
                     throw 'not implemented yet';
             }
         }
-        self.disconnect = true;
-        self.handlers = handlers;
+        return { disconnect: true, handlers };
     }
     doDisconnect(self) {
         const { targets, handlers } = self;
@@ -123,7 +121,7 @@ export class XtalDecoCore extends HTMLElement {
                 });
             }
         });
-        self.disconnect = false;
+        return { disconnect: false };
     }
     doInit(self) {
         const { proxies, init } = self;
@@ -152,23 +150,28 @@ export const XtalDeco = define({
             {
                 do: 'linkProxies',
                 upon: ['targets', 'actions', 'virtualProps'],
-                riff: ['targets', 'actions']
+                riff: ['targets', 'actions'],
+                merge: true,
             }, {
                 do: 'linkTargets',
                 upon: ['nextSiblingTarget'],
                 riff: '"',
+                merge: true,
             }, {
                 do: 'linkNextSiblingTarget',
                 'upon': ['isC', 'matchClosest'],
                 'riff': ['isC'],
+                merge: true,
             }, {
                 do: 'linkHandlers',
                 upon: ['proxies', 'on'],
-                riff: '"'
+                riff: '"',
+                merge: true,
             }, {
                 do: 'doDisconnect',
                 upon: ['targets', 'handlers', 'disconnect'],
-                riff: '"'
+                riff: '"',
+                merge: true,
             }, {
                 do: 'doInit',
                 upon: ['proxies', 'init'],
