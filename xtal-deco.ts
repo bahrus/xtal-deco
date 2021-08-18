@@ -59,8 +59,7 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
             proxies.push(proxy);
             
         });
-        const returnObj = {proxies, mainProxy: proxies[0], mainTarget: targets![0]} as px;
-        delete self.targets; //avoid memory leaks
+        const returnObj = {proxies, mainProxy: proxies[0], mainTarget: targets![0], targets: undefined} as px;
         return returnObj;
     }
 
@@ -136,7 +135,7 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
             target.self = target;
             init!(target as HTMLElement);
         }); 
-        delete self.proxies; //avoid memory leaks
+        return {proxies: undefined} as px;
     }
 
     watchForTargetRelease(self: x){
@@ -187,7 +186,8 @@ export const XtalDeco = define<IXtalDeco>({
             },{
                 do: 'doInit',
                 upon: ['proxies', 'init'],
-                riff: '"'
+                riff: '"',
+                merge: true,
             },{
                 do: 'watchForTargetRelease',
                 upon: ['mainTarget'],
