@@ -30,12 +30,11 @@
     "url": "git+https://github.com/bahrus/xtal-deco.git"
   },
   "dependencies": {
-    "trans-render": "0.0.306",
-    "xtal-element": "0.0.422"
+    "trans-render": "0.0.306"
   },
   "devDependencies": {
     "@skypack/package-check": "0.2.2",
-    "nomodule": "0.0.15",
+    "nomodule": "0.0.16",
     "on-to-me": "0.0.35",
     "xtal-test": "0.0.51"
   },
