@@ -6,9 +6,8 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
 
     targetToProxyMap: WeakMap<any, any> = new WeakMap();
 
-    start(self: x){
-        self.style.display = 'none';
-        self.isC = true;
+    connectedCallback(){
+        this.style.display = 'none';
     }
 
     linkProxies(self: x){
@@ -70,17 +69,18 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
         delete self.targets; //avoid memory leaks
     }
 
-    linkTargetsWithSelector(self: x){
+    linkTargets(self: x){
         const {nextSiblingTarget, whereTargetSelector} = self;
-        const targets = Array.from(nextSiblingTarget!.querySelectorAll(whereTargetSelector!));
-        if(nextSiblingTarget!.matches(whereTargetSelector!)) targets.unshift(nextSiblingTarget!);
-        self.targets = targets;
+        if(whereTargetSelector === undefined){
+            self.targets = [nextSiblingTarget!];
+        }else{
+            const targets = Array.from(nextSiblingTarget!.querySelectorAll(whereTargetSelector!));
+            if(nextSiblingTarget!.matches(whereTargetSelector!)) targets.unshift(nextSiblingTarget!);
+            self.targets = targets;
+        }
     }
 
-    linkTargetsNoSelector(self: x){
-        const {nextSiblingTarget} = self;
-        self.targets = [nextSiblingTarget!];
-    }
+
 
     linkNextSiblingTarget(self: x){
         const {matchClosest, linkNextSiblingTarget, isC} = self;
@@ -164,21 +164,18 @@ type x = IXtalDeco;
 export const XtalDeco = define<IXtalDeco>({
     config:{
         tagName: 'xtal-deco',
-        initMethod: 'start',
+        propDefaults:{
+            isC: true,
+        },
         actions: [
             {
                 do: 'linkProxies',
                 upon: ['targets', 'actions', 'virtualProps'],
                 riff: ['targets', 'actions']
-            },{
-                do: 'linkTargetsWithSelector',
-                upon: ['nextSiblingTarget', 'whereTargetSelector'],
-                riff: '"'
-            },{ //verbose if condition -- overkill ?
-                do: 'linkTargetsNoSelector',
+            },{ 
+                do: 'linkTargets',
                 upon: ['nextSiblingTarget'],
                 riff: '"',
-                rift: ['whereTargetSelector']
             },{
                 do: 'linkNextSiblingTarget',
                 'upon': ['isC', 'matchClosest'],
