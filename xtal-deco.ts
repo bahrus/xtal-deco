@@ -6,10 +6,6 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
 
     targetToProxyMap: WeakMap<any, any> = new WeakMap();
 
-    connectedCallback(){
-        this.style.display = 'none';
-    }
-
     linkProxies(self: x){
         const {targets, actions, virtualProps, targetToProxyMap} = self;
         const proxies: Element[] = [];
@@ -197,7 +193,10 @@ export const XtalDeco = define<IXtalDeco>({
                 upon: ['mainTarget'],
                 riff: '"',
             }
-        ]
+        ],
+        style: {
+            display: 'none'
+        }
     },
     mixins: [XtalDecoMixin]
 }) as {new(): IXtalDeco};
