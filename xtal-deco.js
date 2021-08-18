@@ -1,6 +1,6 @@
 import { define, camelToLisp } from 'trans-render/lib/define.js';
-import { getDestructArgs } from 'xtal-element/lib/getDestructArgs.js';
-const XtalDecoMixin = (baseClass) => class extends baseClass {
+import { getDestructArgs } from 'trans-render/lib/getDestructArgs.js';
+export class XtalDecoCore extends HTMLElement {
     constructor() {
         super(...arguments);
         this.targetToProxyMap = new WeakMap();
@@ -139,7 +139,8 @@ const XtalDecoMixin = (baseClass) => class extends baseClass {
             self.mainTarget = undefined;
         });
     }
-};
+}
+;
 //export interface XtalDeco extends HTMLElement, XtalDecoMethods{}
 export const XtalDeco = define({
     config: {
@@ -182,7 +183,7 @@ export const XtalDeco = define({
             display: 'none'
         }
     },
-    mixins: [XtalDecoMixin]
+    superclass: XtalDecoCore
 });
 //https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
 function getNextSibling(elem, selector) {

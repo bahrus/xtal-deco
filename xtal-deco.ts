@@ -1,8 +1,8 @@
 import {define, camelToLisp} from 'trans-render/lib/define.js';
 import {XtalDecoProps, eventHandlers, IXtalDeco} from './types.js';
-import {getDestructArgs} from 'xtal-element/lib/getDestructArgs.js';
+import {getDestructArgs} from 'trans-render/lib/getDestructArgs.js';
 
-const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseClass implements IXtalDeco{
+export class XtalDecoCore extends HTMLElement implements IXtalDeco{
 
     targetToProxyMap: WeakMap<any, any> = new WeakMap();
 
@@ -149,9 +149,6 @@ const XtalDecoMixin = (baseClass: {new(): HTMLElement}) =>  class extends baseCl
     }
 };
 
-
-
-
 type x = IXtalDeco;
 
 
@@ -198,7 +195,7 @@ export const XtalDeco = define<IXtalDeco>({
             display: 'none'
         }
     },
-    mixins: [XtalDecoMixin]
+    superclass: XtalDecoCore
 }) as {new(): IXtalDeco};
 
 //https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
