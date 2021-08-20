@@ -1,5 +1,6 @@
-import { define, camelToLisp } from 'trans-render/lib/define.js';
+import { CE } from 'trans-render/lib/CE.js';
 import { getDestructArgs } from 'trans-render/lib/getDestructArgs.js';
+const ce = new CE();
 export class XtalDecoCore extends HTMLElement {
     constructor() {
         super(...arguments);
@@ -31,7 +32,7 @@ export class XtalDecoCore extends HTMLElement {
                     });
                     switch (typeof key) {
                         case 'string':
-                            self.dispatchEvent(new CustomEvent(camelToLisp(key) + '-changed', {
+                            self.dispatchEvent(new CustomEvent(ce.toLisp(key) + '-changed', {
                                 detail: {
                                     value: value
                                 }
@@ -59,8 +60,7 @@ export class XtalDecoCore extends HTMLElement {
             targetToProxyMap.set(proxyTarget, proxy);
             proxies.push(proxy);
         });
-        const returnObj = { proxies, mainProxy: proxies[0], mainTarget: targets[0] };
-        delete self.targets; //avoid memory leaks
+        const returnObj = { proxies, mainProxy: proxies[0], mainTarget: targets[0], targets: undefined };
         return returnObj;
     }
     linkTargets(self) {
@@ -129,7 +129,7 @@ export class XtalDecoCore extends HTMLElement {
             target.self = target;
             init(target);
         });
-        delete self.proxies; //avoid memory leaks
+        return { proxies: undefined };
     }
     watchForTargetRelease(self) {
         const { mainTarget } = self;
@@ -140,48 +140,48 @@ export class XtalDecoCore extends HTMLElement {
 }
 ;
 //export interface XtalDeco extends HTMLElement, XtalDecoMethods{}
-export const XtalDeco = define({
+export const XtalDeco = ce.def({
     config: {
         tagName: 'xtal-deco',
         propDefaults: {
             isC: true,
         },
-        actions: [
-            {
-                do: 'linkProxies',
+        actions: {
+            linkProxies: {
                 upon: ['targets', 'actions', 'virtualProps'],
                 riff: ['targets', 'actions'],
                 merge: true,
-            }, {
-                do: 'linkTargets',
+            },
+            linkTargets: {
                 upon: ['nextSiblingTarget'],
                 riff: '"',
                 merge: true,
-            }, {
-                do: 'linkNextSiblingTarget',
+            },
+            linkNextSiblingTarget: {
                 'upon': ['isC', 'matchClosest'],
                 'riff': ['isC'],
                 merge: true,
-            }, {
-                do: 'linkHandlers',
+            },
+            linkHandlers: {
                 upon: ['proxies', 'on'],
                 riff: '"',
                 merge: true,
-            }, {
-                do: 'doDisconnect',
+            },
+            doDisconnect: {
                 upon: ['targets', 'handlers', 'disconnect'],
                 riff: '"',
                 merge: true,
-            }, {
-                do: 'doInit',
+            },
+            doInit: {
                 upon: ['proxies', 'init'],
-                riff: '"'
-            }, {
-                do: 'watchForTargetRelease',
+                riff: '"',
+                merge: true,
+            },
+            watchForTargetRelease: {
                 upon: ['mainTarget'],
                 riff: '"',
             }
-        ],
+        },
         style: {
             display: 'none'
         }

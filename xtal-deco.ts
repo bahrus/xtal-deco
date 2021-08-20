@@ -1,6 +1,8 @@
-import {define, camelToLisp} from 'trans-render/lib/define.js';
+import {CE} from 'trans-render/lib/CE.js';
 import {XtalDecoProps, eventHandlers, IXtalDeco} from './types.js';
 import {getDestructArgs} from 'trans-render/lib/getDestructArgs.js';
+
+const ce = new CE<IXtalDeco>();
 
 export class XtalDecoCore extends HTMLElement implements IXtalDeco{
 
@@ -31,7 +33,7 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
                     });
                     switch(typeof key){
                         case 'string':
-                            self.dispatchEvent(new CustomEvent(camelToLisp(key) + '-changed', {
+                            self.dispatchEvent(new CustomEvent(ce.toLisp(key) + '-changed', {
                                 detail:{
                                     value: value
                                 }
@@ -151,49 +153,48 @@ type x = IXtalDeco; type px = Partial<x>;
 
 //export interface XtalDeco extends HTMLElement, XtalDecoMethods{}
 
-export const XtalDeco = define<IXtalDeco>({
+export const XtalDeco = ce.def({
     config:{
         tagName: 'xtal-deco',
         propDefaults:{
             isC: true,
         },
-        actions: [
-            {
-                do: 'linkProxies',
+        actions: {
+            linkProxies: {
                 upon: ['targets', 'actions', 'virtualProps'],
                 riff: ['targets', 'actions'],
                 merge: true,
-            },{ 
-                do: 'linkTargets',
+            },
+            linkTargets: { 
                 upon: ['nextSiblingTarget'],
                 riff: '"',
                 merge: true,
-            },{
-                do: 'linkNextSiblingTarget',
+            },
+            linkNextSiblingTarget: {
                 'upon': ['isC', 'matchClosest'],
                 'riff': ['isC'],
                 merge: true,
-            },{
-                do: 'linkHandlers',
+            },
+            linkHandlers: {
                 upon: ['proxies', 'on'],
                 riff: '"',
                 merge: true,
-            },{
-                do: 'doDisconnect',
+            },
+            doDisconnect: {
                 upon: ['targets', 'handlers', 'disconnect'],
                 riff: '"',
                 merge: true,
-            },{
-                do: 'doInit',
+            },
+            doInit: {
                 upon: ['proxies', 'init'],
                 riff: '"',
                 merge: true,
-            },{
-                do: 'watchForTargetRelease',
+            },
+            watchForTargetRelease: {
                 upon: ['mainTarget'],
                 riff: '"',
             }
-        ],
+        },
         style: {
             display: 'none'
         }
