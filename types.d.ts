@@ -55,7 +55,7 @@ export interface XtalDecoProps<TTargetElement extends Element = Element>{
 
 type x = IXtalDeco;
 export interface IXtalDeco extends XtalDecoProps, HTMLElement{
-    linkProxies(self: x): void;
+    createProxies(self: x): void;
     linkTargets(self: x): void;
     linkNextSiblingTarget(self: x): void;
     linkHandlers(self: x): void;

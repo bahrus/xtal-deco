@@ -8,12 +8,11 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
 
     targetToProxyMap: WeakMap<any, any> = new WeakMap();
 
-    linkProxies(self: x){
+    createProxies(self: x){
         const {targets, actions, virtualProps, targetToProxyMap} = self;
         const proxies: Element[] = [];
         const virtualPropHolders = new WeakMap();
         targets!.forEach(proxyTarget =>{
-            
             const proxy = new Proxy(proxyTarget, {
                 set: (target: any, key, value) => {
                     const virtualPropHolder = virtualPropHolders.get(target);
@@ -76,7 +75,6 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
             return {targets} as px;
         }
     }
-
 
 
     linkNextSiblingTarget(self: x){
@@ -160,39 +158,28 @@ export const XtalDeco = ce.def({
             isC: true,
         },
         actions: {
-            linkProxies: {
-                upon: ['targets', 'actions', 'virtualProps'],
-                riff: ['targets', 'actions'],
-                merge: true,
+            createProxies: {
+                ifAllOf: ['targets', 'actions'],
+                andAlsoActIfKeyIn: ['virtualProps'],
             },
             linkTargets: { 
-                upon: ['nextSiblingTarget'],
-                riff: '"',
-                merge: true,
+                ifAllOf: ['nextSiblingTarget'],
             },
             linkNextSiblingTarget: {
-                'upon': ['isC', 'matchClosest'],
-                'riff': ['isC'],
-                merge: true,
+                ifAllOf: ['isC'],
+                andAlsoActIfKeyIn: ['matchClosest'],
             },
             linkHandlers: {
-                upon: ['proxies', 'on'],
-                riff: '"',
-                merge: true,
+                ifAllOf: ['proxies', 'on']
             },
             doDisconnect: {
-                upon: ['targets', 'handlers', 'disconnect'],
-                riff: '"',
-                merge: true,
+                ifAllOf: ['targets', 'handlers', 'disconnect'],
             },
             doInit: {
-                upon: ['proxies', 'init'],
-                riff: '"',
-                merge: true,
+                ifAllOf: ['proxies', 'init'],
             },
             watchForTargetRelease: {
-                upon: ['mainTarget'],
-                riff: '"',
+                ifAllOf: ['mainTarget'],
             }
         },
         style: {

@@ -6,7 +6,7 @@ export class XtalDecoCore extends HTMLElement {
         super(...arguments);
         this.targetToProxyMap = new WeakMap();
     }
-    linkProxies(self) {
+    createProxies(self) {
         const { targets, actions, virtualProps, targetToProxyMap } = self;
         const proxies = [];
         const virtualPropHolders = new WeakMap();
@@ -147,39 +147,28 @@ export const XtalDeco = ce.def({
             isC: true,
         },
         actions: {
-            linkProxies: {
-                upon: ['targets', 'actions', 'virtualProps'],
-                riff: ['targets', 'actions'],
-                merge: true,
+            createProxies: {
+                ifAllOf: ['targets', 'actions'],
+                andAlsoActIfKeyIn: ['virtualProps'],
             },
             linkTargets: {
-                upon: ['nextSiblingTarget'],
-                riff: '"',
-                merge: true,
+                ifAllOf: ['nextSiblingTarget'],
             },
             linkNextSiblingTarget: {
-                'upon': ['isC', 'matchClosest'],
-                'riff': ['isC'],
-                merge: true,
+                ifAllOf: ['isC'],
+                andAlsoActIfKeyIn: ['matchClosest'],
             },
             linkHandlers: {
-                upon: ['proxies', 'on'],
-                riff: '"',
-                merge: true,
+                ifAllOf: ['proxies', 'on']
             },
             doDisconnect: {
-                upon: ['targets', 'handlers', 'disconnect'],
-                riff: '"',
-                merge: true,
+                ifAllOf: ['targets', 'handlers', 'disconnect'],
             },
             doInit: {
-                upon: ['proxies', 'init'],
-                riff: '"',
-                merge: true,
+                ifAllOf: ['proxies', 'init'],
             },
             watchForTargetRelease: {
-                upon: ['mainTarget'],
-                riff: '"',
+                ifAllOf: ['mainTarget'],
             }
         },
         style: {
