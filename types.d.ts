@@ -53,15 +53,15 @@ export interface XtalDecoProps<TTargetElement extends Element = Element>{
     isC?: boolean;
 }
 
-type x = IXtalDeco;
-export interface IXtalDeco extends XtalDecoProps, HTMLElement{
-    createProxies(self: x): void;
-    linkTargets(self: x): void;
-    linkNextSiblingTarget(self: x): void;
-    linkHandlers(self: x): void;
-    doDisconnect(self: x): void;
-    doInit(self: x): void;
-    watchForTargetRelease(self: x): void;
+
+export interface XtalDecoActions {
+    createProxies(self: this): void;
+    linkTargets(self: this): void;
+    linkNextSiblingTarget(self: this): void;
+    linkHandlers(self: this): void;
+    doDisconnect(self: this): void;
+    doInit(self: this): void;
+    watchForTargetRelease(self: this): void;
 }
 
 type eventHandlers = {[key: string]: ((e: Event) => void)[]};

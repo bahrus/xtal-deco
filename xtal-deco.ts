@@ -1,14 +1,14 @@
-import {CE} from 'trans-render/lib/CE.js';
-import {XtalDecoProps, eventHandlers, IXtalDeco} from './types.js';
+import {CE, PropInfo} from 'trans-render/lib/CE.js';
+import {XtalDecoProps, eventHandlers, XtalDecoActions} from './types.js';
 import {getDestructArgs} from 'trans-render/lib/getDestructArgs.js';
 
-const ce = new CE<IXtalDeco>();
+const ce = new CE<XtalDecoProps, PropInfo, XtalDecoActions>();
 
-export class XtalDecoCore extends HTMLElement implements IXtalDeco{
+export class XtalDecoCore extends HTMLElement implements XtalDecoActions{
 
     targetToProxyMap: WeakMap<any, any> = new WeakMap();
 
-    createProxies(self: x){
+    createProxies(self: this){
         const {targets, actions, virtualProps, targetToProxyMap} = self;
         const proxies: Element[] = [];
         const virtualPropHolders = new WeakMap();
@@ -64,7 +64,7 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
         return returnObj;
     }
 
-    linkTargets(self: x){
+    linkTargets(self: this){
         const {nextSiblingTarget, whereTargetSelector} = self;
 
         if(whereTargetSelector === undefined){
@@ -77,7 +77,7 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
     }
 
 
-    linkNextSiblingTarget(self: x){
+    linkNextSiblingTarget(self: this){
         const {matchClosest, linkNextSiblingTarget, isC} = self;
         const nextSiblingTarget = getNextSibling(self, matchClosest);
         if(!nextSiblingTarget){
@@ -89,7 +89,7 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
         return {nextSiblingTarget};
     }
 
-    linkHandlers(self: x){
+    linkHandlers(self: this){
         const {proxies, on} = self;
         const handlers: eventHandlers = {};
         for(var key in on){
@@ -116,7 +116,7 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
         return {disconnect: true, handlers} as px;
     }
 
-    doDisconnect(self: x){
+    doDisconnect(self: this){
         const {targets, handlers} = self;
         targets!.forEach(target =>{
             for(const key in handlers){
@@ -129,7 +129,7 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
         return {disconnect: false} as px;
     }
 
-    doInit(self: x){
+    doInit(self: this){
         const {proxies, init} = self;
         proxies!.forEach((target: any) => {
             target.self = target;
@@ -138,7 +138,7 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
         return {proxies: undefined} as px;
     }
 
-    watchForTargetRelease(self: x){
+    watchForTargetRelease(self: this){
         const {mainTarget} = self;
         onRemove(mainTarget!, () =>{
             self.mainTarget = undefined;
@@ -146,8 +146,9 @@ export class XtalDecoCore extends HTMLElement implements IXtalDeco{
     }
 };
 
-type x = IXtalDeco; type px = Partial<x>;
+export interface XtalDecoCore extends XtalDecoProps {}
 
+type px = Partial<XtalDecoCore>;
 
 //export interface XtalDeco extends HTMLElement, XtalDecoMethods{}
 
@@ -187,7 +188,7 @@ export const XtalDeco = ce.def({
         }
     },
     superclass: XtalDecoCore
-}) as {new(): IXtalDeco};
+}) as {new(): XtalDecoCore};
 
 //https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
 function getNextSibling (elem: Element, selector: string | undefined) {
@@ -207,7 +208,7 @@ function getNextSibling (elem: Element, selector: string | undefined) {
 
 declare global {
     interface HTMLElementTagNameMap {
-        "xtal-deco": IXtalDeco,
+        "xtal-deco": XtalDecoCore,
     }
 }
 
