@@ -2,7 +2,7 @@ import {CE, PropInfo} from 'trans-render/lib/CE.js';
 import {XtalDecoProps, eventHandlers, XtalDecoActions} from './types.js';
 import {getDestructArgs} from 'trans-render/lib/getDestructArgs.js';
 
-const ce = new CE<XtalDecoProps, PropInfo, XtalDecoActions>();
+const ce = new CE<XtalDecoProps, XtalDecoActions, PropInfo>();
 
 export class XtalDecoCore extends HTMLElement implements XtalDecoActions{
 
