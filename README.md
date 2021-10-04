@@ -30,6 +30,9 @@ The other key properties of xtal-deco are:
 
 1.  on -- This is where we attach event listeners on the target element.
 2.  init -- This is where we initialize the behavior.
+3.  finale -- this is where we clean up when the decorated element is set free from the DOM tree.
+
+All four properties -- actions, on, init, finale, are required to be defined for the decoration to take place (even if they don't actually do anything).
 
 ## Setting proxyActions
 
@@ -57,7 +60,10 @@ Syntax example for approach 2:
         },
         init: ({self}) => {
             self.count = 0;
-        }
+        },
+        finale:({self}) => {
+            console.log("Good bye");
+        },
     }
     Object.assign(selfish.parentElement, decoProps);
 </script></xtal-deco>

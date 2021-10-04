@@ -1,13 +1,11 @@
 import { CE } from 'trans-render/lib/CE.js';
 import { getDestructArgs } from 'trans-render/lib/getDestructArgs.js';
+import { onRemove } from 'trans-render/lib/onRemove.js';
 const ce = new CE();
 export class XtalDecoCore extends HTMLElement {
-    constructor() {
-        super(...arguments);
-        this.targetToProxyMap = new WeakMap();
-    }
-    createProxies(self) {
-        const { targets, actions, virtualProps, targetToProxyMap } = self;
+    targetToProxyMap = new WeakMap();
+    self = this;
+    createProxies({ targets, actions, virtualProps, targetToProxyMap, finale }) {
         const proxies = [];
         const virtualPropHolders = new WeakMap();
         targets.forEach(proxyTarget => {
@@ -59,12 +57,14 @@ export class XtalDecoCore extends HTMLElement {
             virtualPropHolders.set(proxyTarget, {});
             targetToProxyMap.set(proxyTarget, proxy);
             proxies.push(proxy);
+            onRemove(proxyTarget, (removedEl) => {
+                finale(proxy, removedEl);
+            });
         });
-        const returnObj = { proxies, mainProxy: proxies[0], mainTarget: targets[0], targets: undefined };
+        const returnObj = { proxies, mainProxy: proxies[0], mainTarget: targets[0] };
         return returnObj;
     }
-    linkTargets(self) {
-        const { nextSiblingTarget, whereTargetSelector } = self;
+    linkTargets({ nextSiblingTarget, whereTargetSelector }) {
         if (whereTargetSelector === undefined) {
             return { targets: [nextSiblingTarget] };
         }
@@ -75,8 +75,7 @@ export class XtalDecoCore extends HTMLElement {
             return { targets };
         }
     }
-    linkNextSiblingTarget(self) {
-        const { matchClosest, linkNextSiblingTarget, isC } = self;
+    linkNextSiblingTarget({ matchClosest, linkNextSiblingTarget, isC, self }) {
         const nextSiblingTarget = getNextSibling(self, matchClosest);
         if (!nextSiblingTarget) {
             setTimeout(() => {
@@ -86,8 +85,7 @@ export class XtalDecoCore extends HTMLElement {
         }
         return { nextSiblingTarget };
     }
-    linkHandlers(self) {
-        const { proxies, on } = self;
+    linkHandlers({ proxies, on }) {
         const handlers = {};
         for (var key in on) {
             const eventSetting = on[key];
@@ -111,8 +109,7 @@ export class XtalDecoCore extends HTMLElement {
         }
         return { disconnect: true, handlers };
     }
-    doDisconnect(self) {
-        const { targets, handlers } = self;
+    doDisconnect({ targets, handlers }) {
         targets.forEach(target => {
             for (const key in handlers) {
                 const targetHandlers = handlers[key];
@@ -123,8 +120,7 @@ export class XtalDecoCore extends HTMLElement {
         });
         return { disconnect: false };
     }
-    doInit(self) {
-        const { proxies, init } = self;
+    doInit({ proxies, init }) {
         proxies.forEach((target) => {
             target.self = target;
             init(target);
@@ -148,15 +144,15 @@ export const XtalDeco = ce.def({
         },
         actions: {
             createProxies: {
-                ifAllOf: ['targets', 'actions'],
-                andAlsoActIfKeyIn: ['virtualProps'],
+                ifAllOf: ['targets', 'actions', 'finale'],
+                ifKeyIn: ['virtualProps'],
             },
             linkTargets: {
                 ifAllOf: ['nextSiblingTarget'],
             },
             linkNextSiblingTarget: {
                 ifAllOf: ['isC'],
-                andAlsoActIfKeyIn: ['matchClosest'],
+                ifKeyIn: ['matchClosest'],
             },
             linkHandlers: {
                 ifAllOf: ['proxies', 'on']
@@ -169,7 +165,7 @@ export const XtalDeco = ce.def({
             },
             watchForTargetRelease: {
                 ifAllOf: ['mainTarget'],
-            }
+            },
         },
         style: {
             display: 'none'
@@ -191,23 +187,5 @@ function getNextSibling(elem, selector) {
         sibling = sibling.nextElementSibling;
     }
     return sibling;
-}
-;
-// https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Mutation_events#Mutation_Observers_alternatives_examples
-//can't we use https://developer.mozilla.org/en-US/docs/Web/API/Node/contains#:~:text=The%20Node.,direct%20children%2C%20and%20so%20on.?
-function onRemove(element, callback) {
-    let observer = new MutationObserver(mutations => {
-        mutations.forEach(mutation => {
-            mutation.removedNodes.forEach(removed => {
-                if (element === removed) {
-                    callback();
-                    observer.disconnect();
-                }
-            });
-        });
-    });
-    observer.observe(element.parentElement || element.getRootNode(), {
-        childList: true,
-    });
 }
 ;

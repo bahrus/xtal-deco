@@ -40,6 +40,8 @@ export interface XtalDecoProps<TTargetElement extends Element = Element>{
 
     init?: PropAction<TTargetElement>;
 
+    finale?: (proxy: Element, removedElement: Element) => void;
+
     on?: EventSettings;
 
     matchClosest?: string;

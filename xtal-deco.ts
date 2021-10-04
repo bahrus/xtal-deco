@@ -1,6 +1,7 @@
 import {CE, PropInfo} from 'trans-render/lib/CE.js';
 import {XtalDecoProps, eventHandlers, XtalDecoActions} from './types.js';
 import {getDestructArgs} from 'trans-render/lib/getDestructArgs.js';
+import {onRemove} from 'trans-render/lib/onRemove.js';
 
 const ce = new CE<XtalDecoProps, XtalDecoActions, PropInfo>();
 
@@ -8,8 +9,9 @@ export class XtalDecoCore extends HTMLElement implements XtalDecoActions{
 
     targetToProxyMap: WeakMap<any, any> = new WeakMap();
 
-    createProxies(self: this){
-        const {targets, actions, virtualProps, targetToProxyMap} = self;
+    self = this;
+
+    createProxies({targets, actions, virtualProps, targetToProxyMap, finale}: this){
         const proxies: Element[] = [];
         const virtualPropHolders = new WeakMap();
         targets!.forEach(proxyTarget =>{
@@ -57,16 +59,18 @@ export class XtalDecoCore extends HTMLElement implements XtalDecoActions{
             });
             virtualPropHolders.set(proxyTarget, {});
             targetToProxyMap.set(proxyTarget, proxy);
-            proxies.push(proxy);
-            
+            proxies.push(proxy); 
+            onRemove(proxyTarget, (removedEl: Element) => {
+                finale!(proxy, removedEl);
+            });         
         });
-        const returnObj = {proxies, mainProxy: proxies[0], mainTarget: targets![0], targets: undefined} as px;
+        const returnObj = {proxies, mainProxy: proxies[0], mainTarget: targets![0]} as px;
         return returnObj;
     }
 
-    linkTargets(self: this){
-        const {nextSiblingTarget, whereTargetSelector} = self;
 
+
+    linkTargets({nextSiblingTarget, whereTargetSelector}: this){
         if(whereTargetSelector === undefined){
             return {targets : [nextSiblingTarget!]} as px;
         }else{
@@ -77,8 +81,7 @@ export class XtalDecoCore extends HTMLElement implements XtalDecoActions{
     }
 
 
-    linkNextSiblingTarget(self: this){
-        const {matchClosest, linkNextSiblingTarget, isC} = self;
+    linkNextSiblingTarget({matchClosest, linkNextSiblingTarget, isC, self}: this){
         const nextSiblingTarget = getNextSibling(self, matchClosest);
         if(!nextSiblingTarget){
             setTimeout(() =>{
@@ -89,8 +92,7 @@ export class XtalDecoCore extends HTMLElement implements XtalDecoActions{
         return {nextSiblingTarget};
     }
 
-    linkHandlers(self: this){
-        const {proxies, on} = self;
+    linkHandlers({proxies, on}: this){
         const handlers: eventHandlers = {};
         for(var key in on){
             const eventSetting = on[key];
@@ -116,8 +118,7 @@ export class XtalDecoCore extends HTMLElement implements XtalDecoActions{
         return {disconnect: true, handlers} as px;
     }
 
-    doDisconnect(self: this){
-        const {targets, handlers} = self;
+    doDisconnect({targets, handlers}: this){
         targets!.forEach(target =>{
             for(const key in handlers){
                 const targetHandlers = handlers[key];
@@ -129,14 +130,15 @@ export class XtalDecoCore extends HTMLElement implements XtalDecoActions{
         return {disconnect: false} as px;
     }
 
-    doInit(self: this){
-        const {proxies, init} = self;
+    doInit({proxies, init}: this){
         proxies!.forEach((target: any) => {
             target.self = target;
             init!(target as HTMLElement);
         }); 
         return {proxies: undefined} as px;
     }
+
+
 
     watchForTargetRelease(self: this){
         const {mainTarget} = self;
@@ -160,15 +162,15 @@ export const XtalDeco = ce.def({
         },
         actions: {
             createProxies: {
-                ifAllOf: ['targets', 'actions'],
-                andAlsoActIfKeyIn: ['virtualProps'],
+                ifAllOf: ['targets', 'actions', 'finale'],
+                ifKeyIn: ['virtualProps'],
             },
             linkTargets: { 
                 ifAllOf: ['nextSiblingTarget'],
             },
             linkNextSiblingTarget: {
                 ifAllOf: ['isC'],
-                andAlsoActIfKeyIn: ['matchClosest'],
+                ifKeyIn: ['matchClosest'],
             },
             linkHandlers: {
                 ifAllOf: ['proxies', 'on']
@@ -181,7 +183,7 @@ export const XtalDeco = ce.def({
             },
             watchForTargetRelease: {
                 ifAllOf: ['mainTarget'],
-            }
+            },
         },
         style: {
             display: 'none'
@@ -212,22 +214,6 @@ declare global {
     }
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Mutation_events#Mutation_Observers_alternatives_examples
-//can't we use https://developer.mozilla.org/en-US/docs/Web/API/Node/contains#:~:text=The%20Node.,direct%20children%2C%20and%20so%20on.?
-function onRemove(element: Element, callback: Function) {
-    let observer = new MutationObserver(mutations => {
-        mutations.forEach(mutation =>{
-            mutation.removedNodes.forEach(removed =>{
-                if(element === removed){
-                    callback();
-                    observer.disconnect();
-                }
-            })
-        })
-    });
-    observer.observe(element.parentElement || element.getRootNode(), {
-        childList: true,
-    });
-};
+
 
 

@@ -9,45 +9,54 @@
 </head>
 
 <body>
-    <div>
-        <xtal-deco disabled  virtual-props='["count"]'><script nomodule=ish>
-            const decoProps = {
-                actions: [
-                    ({count, self}) => {
-                        window.alert(count + " butterbeers sold");
-                    }
-                ],
-                on: {
-                    'click': ({self}) => {
-                        self.count++;
-                    }
-                },
-                init: ({self}) =>{
-                    self.count = 0;
-                }
-            }
-            Object.assign(selfish.parentElement, decoProps);
+    <xtal-deco disabled  virtual-props='["count"]'><script nomodule=ish>
+        const decoProps = {
 
-        </script></xtal-deco>
-        <button data-drink-selection="Butterbeer">Click me to Order Your Drink</button>
-        <on-to-me observe=xtal-deco on="count-changed" to=[-text-content] val=detail.value></on-to-me>
-        <span -text-content></span> drinks sold.
-        <script type=importmap>
-        {
-            "imports": {
-                "trans-render/": "../node_modules/trans-render/",
-                "nomodule/": "../node_modules/nomodule/",
-                "css-observe/": "../node_modules/css-observe/",
-                "on-to-me/": "../node_modules/on-to-me/"
-            }
+            actions: [
+                ({count, self}) => {
+                    //window.alert(count + " butterbeers sold");
+                }
+            ],
+            on: {
+                'click': ({self}) => {
+                    self.count++;
+                }
+            },
+            init: ({self}) =>{
+                self.count = 0;
+            },
+            finale: ({self}, removedElement) => {
+                console.log({self, removedElement});
+            },
+
         }
-        </script>
-        <script type=module>
-            import '../xtal-deco.js';
-            import 'on-to-me/on-to-me.js';
-            import 'nomodule/no-module.js';
-        </script>
-    </div>
+        Object.assign(selfish.parentElement, decoProps);
+
+    </script></xtal-deco>
+    <button data-drink-selection="Butterbeer">Click me to Order Your Drink</button>
+    <on-to-me observe=xtal-deco on="count-changed" to=[-text-content] val=detail.value></on-to-me>
+    <span -text-content></span> drinks sold.
+    <button onclick="testFinale()">Test Finale</button>
+    <script>
+        function testFinale(){
+            document.querySelector('button[data-drink-selection]').remove();
+        }
+    </script>
+    <script type=importmap>
+    {
+        "imports": {
+            "trans-render/": "../node_modules/trans-render/",
+            "nomodule/": "../node_modules/nomodule/",
+            "css-observe/": "../node_modules/css-observe/",
+            "on-to-me/": "../node_modules/on-to-me/"
+        }
+    }
+    </script>
+    <script type=module>
+        import '../xtal-deco.js';
+        import 'on-to-me/on-to-me.js';
+        import 'nomodule/no-module.js';
+    </script>
 </body>
 
 </html>
