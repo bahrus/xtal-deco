@@ -36,7 +36,7 @@
     "@skypack/package-check": "0.2.2",
     "nomodule": "0.0.18",
     "on-to-me": "0.0.49",
-    "xtal-test": "0.0.51"
+    "xtal-test": "0.0.57"
   },
   "author": "anderson.bruce.b@gmail.com",
   "license": "MIT",
